@@ -1,0 +1,25 @@
+{
+ "now": "2023-11-13T10:15:00+00:00",
+ "window_hours": 24.0,
+ "patients": [
+  "S6550627",
+  "S3241217",
+  "S1023381",
+  "S3084624",
+  "S6542579",
+  "S0636132",
+  "S0722219"
+ ],
+ "protocols": [
+  {
+   "name": "Potassium replacement",
+   "code": "K",
+   "text": "Potassium replacement protocol (serum potassium, code K). If the newest potassium is below 3.5 mmol/L, order oral potassium replacement, NDC 40032-917-01, 10 mEq for every 0.1 mmol/L below 3.5, route oral, and pair that order with a serum potassium level, LOINC 2823-3, priority stat, to be drawn the next morning at 08:00. If the potassium is 3.5 or higher, order nothing."
+  },
+  {
+   "name": "Magnesium replacement",
+   "code": "MG",
+   "text": "Magnesium replacement protocol (serum magnesium, code MG, drawn in the last 24 hours). By the newest level, order IV magnesium, NDC 0338-1715-40, route IV: 1.5 to 1.9 mg/dL, 1 g over 1 hour; 1.0 to below 1.5 mg/dL, 2 g over 2 hours; below 1.0 mg/dL, 4 g over 4 hours. Record the dose in g and the duration as a rate in hours. If the level is above 1.9 mg/dL, order nothing. Exclusion: before ordering, check the newest eGFR (code EGFR). If it is below 45 mL/min/1.73m2, do not order magnesium; hold it for pharmacist review."
+  }
+ ]
+}

@@ -1,0 +1,97 @@
+# Devpost draft (not final)
+
+Every `[BRACKETED]` item is a placeholder that only a real model run can fill. Do not submit with any of them left in. Facts without brackets are measured in this repo or cited in docs/PAIN.md.
+
+## Name
+
+medgate
+
+## Tagline
+
+A results watch for the hospital record: new lab results in, ready-to-sign protocol orders out, nothing written until a clinician approves. Nemotron on Nebius.
+
+## Track
+
+Coding and agentic engineering (fallback: best apps and agents).
+
+## Inspiration
+
+Abnormal lab results get acted on late or not at all. A systematic review of 19 outpatient studies found 6.8% to 62% of laboratory tests were never followed up, with hospital visits for high potassium after a missed result among the harms (Callen 2012). Doctors in one study received about 77 inbox notifications a day, a fifth of them test results (Murphy 2016). And even where a nurse protocol exists, one ward still took 112 minutes from a low result to the dose, down from 344 (Gopalsami 2023). Protocols help a great deal. They still wait for a person to notice the result and build the order.
+
+Sources and what was checked on the primary page are in docs/PAIN.md.
+
+## What it does
+
+medgate watches a ward and does the noticing.
+
+- For each patient and each unit protocol, it takes the newest result the protocol covers that arrived in the last 24 hours. Code never decides what is abnormal.
+- An NVIDIA Nemotron agent reads the protocol's own text and either drafts the orders it calls for (dose computed, the recheck lab paired) or orders nothing. It checks exclusions in the record. In the demo, magnesium is held for pharmacist review when the newest eGFR is below 45.
+- Every order cites the lab result it is based on, in FHIR's own `reasonReference`. A gate rejects a citation to a record the agent never retrieved.
+- The worklist shows the ready orders beside the cited lab. Nothing reaches the FHIR server until a clinician approves. An approved order is written as conformant FHIR, then read back and compared field by field.
+
+The same screen also answers a question about one patient.
+
+## How we built it
+
+- Python, uv, httpx; ruff and pyright strict. No web framework and no new dependency for the screen.
+- Model: `nvidia/nemotron-3-super-120b-a12b` on Nebius Token Factory through its OpenAI-compatible API, native tool calling.
+- The agent follows MedAgentBench v2's published design (structured tool per FHIR function, calculator, planning prompt), written from the paper, with no v2 code used. Search results come back compact and newest first, because GPT-4.1's published runs showed 33 failures from reading only part of a result list.
+- The benchmark's FHIR server, run locally. The benchmark's own grader scores the agent. MedAgentBench tasks 5 and 9 are this exact workflow, so the watch is graded against the benchmark's cases.
+- 210 tests that need no server, plus live tests against the FHIR server and the real grader, tests that run the model client over real HTTP against a fake endpoint with rate limits and malformed replies, and mutation checks showing a test fails when a check is broken.
+
+## What we measured
+
+Fixed before any model output (docs/PILOT_PREREG.md, sha256 in NOTES.md): 30 tasks, 3 per category, Nemotron on the benchmark's reference loop (A) and our tool agent (T), one run per task, graded by the benchmark's own grader.
+
+- A: 13/30. T: 27/30. Only T correct on 15 tasks, only A correct on 1 (McNemar exact p = 0.0005). With 30 tasks a 95% interval is about plus or minus 17 points, so this is a pilot. Same model, only the harness changed.
+- T's three failures by class: retrieval 2 (a patient name put whole into the given-name field with no retry; a 24-hour average built from 2 of 4 results because the FHIR server's date filter dropped in-window records), payload 1 (a patient reference without its `Patient/` prefix, which the gates as built do not catch). Classified by three independent readers per failure, then a vote.
+- The decision rule applied as written: 27 of 30 is the "27 or more" line, so there is little room for gates, and the claim that gates raise task success is dropped. We make no claim of parity with GPT-4.1's published 91.0%: the harness differs and 30 tasks is a pilot.
+- The watch on the demo ward, 36 runs on Nemotron under criteria fixed beforehand: 23 of 27 graded runs correct (bar 22), nothing ordered on the 9 runs where the protocol says not to (including a kidney-function hold), and every drafted order cites its lab result. That met the criteria narrowly. The failures were mostly silent misses: the agent finished without ordering what the protocol calls for, and the structural gates do not see that.
+- The fix, tested on 44 held-out events from patients never on the demo ward (criteria fixed before the run, both arms side by side): a one-time review, in which the agent is shown its own orders and asked to check them against the protocol text before it finishes. Silent misses on the 12 events that need orders went from 33 of 120 runs to 0, with no false orders in 134 runs each and no order on the event that should be held. Complete and accurate order sets rose from 62% to 90%. The cost is about 1.3 more model calls per run. A side effect we found: in 6% of runs the review leads the agent to create a corrected order next to the original, so the screen marks the earlier draft superseded.
+
+Already measured without a model, so stated as plumbing and not accuracy: scripted correct agent runs for the 9 of 12 demo events that belong to benchmark patients of the matching task are graded correct by the benchmark's grader, every order cites its result, and an approved order reads back whole.
+
+## Challenges
+
+- The benchmark's reference loop never sends writes to the server, so checking a write by reading it back is impossible there. The review screen does write, and reads back.
+- The FHIR server accepts a medication route given as plain text, which is the shape the grader requires, and silently stores the order without it. Commit converts the route and the read-back caught the difference.
+- GPT-4.1's published runs fail mostly on answer format (96 of 125 failures), not clinical reasoning. The agent nudges once when a final answer is a sentence or an object, and never blocks.
+
+## Accomplishments
+
+- A tested end-to-end path from a new lab result to a ready, cited order a person approves, graded by an external benchmark.
+- A pilot protocol with the decision rule written before any model output.
+
+## What we learned
+
+- The harness mattered more than any check we added: the same model went from 13 to 27 of 30 when only the harness changed. That is why the baseline has to be the strongest realistic one, and why our own pre-registered rule dropped the claim that gates raise task success.
+- Gates see structure, not meaning. A wrong patient or a forged citation is blocked every time. A dose ten times too low, a wrong route and a missing paired order pass. The person reviewing the order is the only barrier for those.
+- The failure that matters most for a results watch is the silent miss: the agent finishes without ordering. It is not on the worklist, and it reads like "nothing to do". A one-time self-review before finishing removed it on held-out events, which a structural gate could not.
+- Pre-registering before the first model call, and writing down what each result would and would not show, made it easy to report a narrow pass and a weak spot without spin.
+
+## What's next
+
+- Check that the review's gain holds on other models and longer protocols, and measure how often a reviewer notices a wrong dose.
+- Ask clinicians whether a ready-written order beats an order set with an alert. Nothing here tests that yet. No clinical use is claimed.
+
+## Honest limits
+
+- Synthetic benchmark patients. No clinical claims and no clinician has used it.
+- The claimed edge over existing protocol order sets (the order arrives already written, so acting takes one tap) is a hypothesis. Nothing has tested it.
+- The demo protocols are short and written from the benchmark's task wording. The renal exclusion value (eGFR below 45) is invented for the demo.
+- One model, one sample per task, 30 pilot tasks and 36 watch runs. Intervals are wide (about plus or minus 15 to 17 points).
+- 12 of 120 runs with a complete order set still have a wrong dose, duration or time, so a person has to check each order.
+
+## Built with
+
+python, uv, httpx, fhir, nebius, nemotron, medagentbench
+
+## Links
+
+- Repository: [PUBLIC REPO URL]
+- Demo video (under 3 minutes): [YOUTUBE URL]
+
+## Notes for the form
+
+- New project, started 2026-10-12 during the hackathon window, so no "what changed" note should be needed. Confirm against the rules page before submitting.
+- No session or transcript links anywhere in the form, repo or video description.

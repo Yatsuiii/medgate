@@ -1,0 +1,524 @@
+{
+ "ask": {
+  "context": "It's 2023-11-13T10:15:00+00:00 now. The code for potassium is \"K\".The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion) to reach a goal of 3.5 serum level. The LOINC code for serum potassium level is 2823-3.",
+  "question": "Check patient S6550627's most recent potassium level. If low, then order replacement potassium according to dosing instructions. Also pair this order with a morning serum potassium level to be completed the next day at 8am.",
+  "turns": [
+   {
+    "text": "Scripted replay: K 3.1 is below the protocol threshold, so it calls for orders.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S6550627\", \"code\": \"K\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_calculator",
+      "name": "calculator",
+      "arguments": "{\"expression\": \"(3.5 - 3.1) / 0.1 * 10\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_medicationrequest_create",
+      "name": "medicationrequest_create",
+      "arguments": "{\"authoredOn\": \"2023-11-13T10:15:00+00:00\", \"status\": \"active\", \"intent\": \"order\", \"subject\": {\"reference\": \"Patient/S6550627\"}, \"reasonReference\": [{\"reference\": \"Observation/330934\"}], \"medicationCodeableConcept\": {\"coding\": [{\"system\": \"http://hl7.org/fhir/sid/ndc\", \"code\": \"40032-917-01\"}]}, \"dosageInstruction\": [{\"route\": \"oral\", \"doseAndRate\": [{\"doseQuantity\": {\"value\": 40.0, \"unit\": \"mEq\"}}]}]}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_servicerequest_create",
+      "name": "servicerequest_create",
+      "arguments": "{\"authoredOn\": \"2023-11-13T10:15:00+00:00\", \"status\": \"active\", \"intent\": \"order\", \"subject\": {\"reference\": \"Patient/S6550627\"}, \"reasonReference\": [{\"reference\": \"Observation/330934\"}], \"priority\": \"stat\", \"code\": {\"coding\": [{\"system\": \"http://loinc.org\", \"code\": \"2823-3\"}]}, \"occurrenceDateTime\": \"2023-11-14T08:00:00+00:00\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.1]}"
+     }
+    ]
+   }
+  ]
+ },
+ "watch": {
+  "watch:S6550627:K": [
+   {
+    "text": "Scripted replay: K 3.1 is below the protocol threshold, so it calls for orders.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S6550627\", \"code\": \"K\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_calculator",
+      "name": "calculator",
+      "arguments": "{\"expression\": \"(3.5 - 3.1) / 0.1 * 10\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_medicationrequest_create",
+      "name": "medicationrequest_create",
+      "arguments": "{\"authoredOn\": \"2023-11-13T10:15:00+00:00\", \"status\": \"active\", \"intent\": \"order\", \"subject\": {\"reference\": \"Patient/S6550627\"}, \"reasonReference\": [{\"reference\": \"Observation/330934\"}], \"medicationCodeableConcept\": {\"coding\": [{\"system\": \"http://hl7.org/fhir/sid/ndc\", \"code\": \"40032-917-01\"}]}, \"dosageInstruction\": [{\"route\": \"oral\", \"doseAndRate\": [{\"doseQuantity\": {\"value\": 40.0, \"unit\": \"mEq\"}}]}]}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_servicerequest_create",
+      "name": "servicerequest_create",
+      "arguments": "{\"authoredOn\": \"2023-11-13T10:15:00+00:00\", \"status\": \"active\", \"intent\": \"order\", \"subject\": {\"reference\": \"Patient/S6550627\"}, \"reasonReference\": [{\"reference\": \"Observation/330934\"}], \"priority\": \"stat\", \"code\": {\"coding\": [{\"system\": \"http://loinc.org\", \"code\": \"2823-3\"}]}, \"occurrenceDateTime\": \"2023-11-14T08:00:00+00:00\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.1]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: the orders match the protocol.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.1]}"
+     }
+    ]
+   }
+  ],
+  "watch:S3241217:K": [
+   {
+    "text": "Scripted replay: K 3.9 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S3241217\", \"code\": \"K\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.9]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: K 3.9 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.9]}"
+     }
+    ]
+   }
+  ],
+  "watch:S1023381:K": [
+   {
+    "text": "Scripted replay: K 3.8 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S1023381\", \"code\": \"K\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.8]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: K 3.8 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.8]}"
+     }
+    ]
+   }
+  ],
+  "watch:S1023381:MG": [
+   {
+    "text": "Scripted replay: MG 2.0 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S1023381\", \"code\": \"MG\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [2.0]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: MG 2.0 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [2.0]}"
+     }
+    ]
+   }
+  ],
+  "watch:S3084624:K": [
+   {
+    "text": "Scripted replay: K 4.0 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S3084624\", \"code\": \"K\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [4.0]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: K 4.0 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [4.0]}"
+     }
+    ]
+   }
+  ],
+  "watch:S3084624:MG": [
+   {
+    "text": "Scripted replay: MG 1.8 is below the protocol threshold, so it calls for orders.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S3084624\", \"code\": \"MG\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S3084624\", \"code\": \"EGFR\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_medicationrequest_create",
+      "name": "medicationrequest_create",
+      "arguments": "{\"authoredOn\": \"2023-11-13T10:15:00+00:00\", \"status\": \"active\", \"intent\": \"order\", \"subject\": {\"reference\": \"Patient/S3084624\"}, \"reasonReference\": [{\"reference\": \"Observation/344826\"}], \"medicationCodeableConcept\": {\"coding\": [{\"system\": \"http://hl7.org/fhir/sid/ndc\", \"code\": \"0338-1715-40\"}]}, \"dosageInstruction\": [{\"route\": \"IV\", \"doseAndRate\": [{\"doseQuantity\": {\"value\": 1, \"unit\": \"g\"}, \"rateQuantity\": {\"value\": 1, \"unit\": \"h\"}}]}]}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [1.8]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: the order matches the protocol.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [1.8]}"
+     }
+    ]
+   }
+  ],
+  "watch:S6542579:K": [
+   {
+    "text": "Scripted replay: K 3.7 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S6542579\", \"code\": \"K\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.7]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: K 3.7 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.7]}"
+     }
+    ]
+   }
+  ],
+  "watch:S6542579:MG": [
+   {
+    "text": "Scripted replay: MG 1.9 is below the protocol threshold, so it calls for orders.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S6542579\", \"code\": \"MG\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S6542579\", \"code\": \"EGFR\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_medicationrequest_create",
+      "name": "medicationrequest_create",
+      "arguments": "{\"authoredOn\": \"2023-11-13T10:15:00+00:00\", \"status\": \"active\", \"intent\": \"order\", \"subject\": {\"reference\": \"Patient/S6542579\"}, \"reasonReference\": [{\"reference\": \"Observation/338686\"}], \"medicationCodeableConcept\": {\"coding\": [{\"system\": \"http://hl7.org/fhir/sid/ndc\", \"code\": \"0338-1715-40\"}]}, \"dosageInstruction\": [{\"route\": \"IV\", \"doseAndRate\": [{\"doseQuantity\": {\"value\": 1, \"unit\": \"g\"}, \"rateQuantity\": {\"value\": 1, \"unit\": \"h\"}}]}]}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [1.9]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: the order matches the protocol.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [1.9]}"
+     }
+    ]
+   }
+  ],
+  "watch:S0636132:K": [
+   {
+    "text": "Scripted replay: K 4.2 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S0636132\", \"code\": \"K\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [4.2]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: K 4.2 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [4.2]}"
+     }
+    ]
+   }
+  ],
+  "watch:S0636132:MG": [
+   {
+    "text": "Scripted replay: MG 2.0 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S0636132\", \"code\": \"MG\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [2.0]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: MG 2.0 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [2.0]}"
+     }
+    ]
+   }
+  ],
+  "watch:S0722219:K": [
+   {
+    "text": "Scripted replay: K 3.9 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S0722219\", \"code\": \"K\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.9]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: K 3.9 is within range, so nothing is ordered.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [3.9]}"
+     }
+    ]
+   }
+  ],
+  "watch:S0722219:MG": [
+   {
+    "text": "Scripted replay: MG 1.7 is below the protocol threshold, so it calls for orders.",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S0722219\", \"code\": \"MG\"}"
+     }
+    ]
+   },
+   {
+    "text": "",
+    "calls": [
+     {
+      "id": "call_observation_search_labs",
+      "name": "observation_search_labs",
+      "arguments": "{\"patient\": \"S0722219\", \"code\": \"EGFR\"}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: eGFR 41.0 is below 45, so magnesium is held for pharmacist review. No order.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [1.7]}"
+     }
+    ]
+   },
+   {
+    "text": "Scripted replay: eGFR 41.0 is below 45, so magnesium is held for pharmacist review. No order.",
+    "calls": [
+     {
+      "id": "call_finish",
+      "name": "finish",
+      "arguments": "{\"answer\": [1.7]}"
+     }
+    ]
+   }
+  ]
+ }
+}

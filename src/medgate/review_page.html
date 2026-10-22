@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>medgate review</title>
+<style>
+  :root { --ink: #1b1f24; --muted: #5b6672; --line: #d9dee3; --bg: #f6f7f9; --card: #fff;
+          --ok: #1f7a4d; --warn: #a15c00; --bad: #b42318; --accent: #2457c5; }
+  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--bg); }
+  header { padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--card); }
+  h1 { font-size: 19px; margin: 0; }
+  h2 { font-size: 15px; margin: 18px 0 6px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  #mode { margin-top: 8px; display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+  #mode.replay { background: #fff4e0; color: var(--warn); }
+  #mode.model { background: #e8f0fe; color: var(--accent); }
+  nav { margin-top: 12px; display: flex; gap: 6px; }
+  nav button { background: #fff; color: var(--ink); border-color: var(--line); }
+  nav button.current { background: var(--ink); color: #fff; border-color: var(--ink); }
+  main { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.4fr); gap: 20px; padding: 20px 24px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  label { display: block; font-weight: 600; margin: 8px 0 4px; }
+  textarea { width: 100%; box-sizing: border-box; font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+  button { font: inherit; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent);
+           color: #fff; cursor: pointer; }
+  button.secondary { background: #fff; color: var(--ink); border-color: var(--line); }
+  button:disabled { opacity: .5; cursor: default; }
+  ol { padding-left: 20px; margin: 0; }
+  li { margin: 6px 0; }
+  .note { color: var(--muted); }
+  .card.superseded { opacity: 0.6; }
+  code { font-size: 13px; background: #f0f2f4; padding: 1px 4px; border-radius: 3px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: #fff; }
+  .card h3 { margin: 0 0 6px; font-size: 16px; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 6px 0; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  .evidence { background: #f3f8f5; border-left: 3px solid var(--ok); padding: 6px 10px; margin: 8px 0; }
+  .findings { background: #fdf0ef; border-left: 3px solid var(--bad); padding: 6px 10px; margin: 8px 0; }
+  .passed { color: var(--ok); margin: 6px 0; }
+  .written { color: var(--ok); font-weight: 600; }
+  .problem { color: var(--bad); font-weight: 600; }
+  .event { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 12px 0; background: #fbfcfd; }
+  .event.action { border-left: 4px solid var(--warn); }
+  .event.quiet { border-left: 4px solid var(--line); }
+  .summary { font-weight: 600; margin: 4px 0 8px; }
+  pre { white-space: pre-wrap; font-size: 12px; margin: 4px 0; }
+  .protocol { margin: 6px 0; }
+  [hidden] { display: none !important; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>medgate: review before the chart</h1>
+  <p>The agent applies your unit's protocols to new results and drafts the orders. Every order shows the result it is
+     based on. Nothing is written until you approve it.</p>
+  <span id="mode"></span>
+  <nav>
+    <button id="tab-watch" class="current">Results watch</button>
+    <button id="tab-ask">Ask about a patient</button>
+  </nav>
+</header>
+
+<main id="watch-view">
+  <section>
+    <h2>Ward</h2>
+    <p id="ward-meta" class="note"></p>
+    <label for="patients">Patients (one MRN per line)</label>
+    <textarea id="patients" rows="6"></textarea>
+    <h2>Protocols</h2>
+    <div id="protocols"></div>
+    <p><button id="scan">Check new results</button> <span id="scan-status" class="note"></span></p>
+  </section>
+  <section>
+    <h2>Worklist</h2>
+    <p id="worklist-empty" class="note">New results the protocols cover appear here, with any orders the agent drafted.</p>
+    <p id="worklist-summary" class="summary"></p>
+    <div id="worklist"></div>
+  </section>
+</main>
+
+<main id="ask-view" hidden>
+  <section>
+    <label for="context">Context</label>
+    <textarea id="context" rows="3"></textarea>
+    <label for="question">Question</label>
+    <textarea id="question" rows="4"></textarea>
+    <p><button id="run">Run the agent</button> <span id="status" class="note"></span></p>
+    <h2>Steps</h2>
+    <ol id="steps"></ol>
+    <h2>Answer</h2>
+    <p id="answer" class="note">No run yet.</p>
+  </section>
+  <section>
+    <h2>Proposed writes</h2>
+    <p id="none" class="note">The agent's proposed writes appear here, each with the records it cites.</p>
+    <div id="proposals"></div>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key === "class") node.className = value; else node.setAttribute(key, value);
+  }
+  for (const child of children) node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  return node;
+}
+
+async function post(path, body) {
+  const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || response.statusText);
+  return data;
+}
+
+function concept(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  const coding = (value.coding || [])[0] || {};
+  return value.text || (typeof coding === "string" ? coding : coding.display || coding.code || "");
+}
+
+function rowsOf(payload) {
+  const dosage = (payload.dosageInstruction || [])[0];
+  const rate = dosage && (dosage.doseAndRate || [])[0];
+  const quantity = (q) => q && `${q.value} ${q.unit || ""}`.trim();
+  const note = payload.note && (Array.isArray(payload.note) ? payload.note.map((n) => n.text).join(" ") : payload.note.text);
+  return [
+    ["Patient", payload.subject && payload.subject.reference],
+    ["Dose", rate && quantity(rate.doseQuantity)],
+    ["Rate", rate && quantity(rate.rateQuantity)],
+    ["Route", dosage && concept(dosage.route)],
+    ["Value", payload.valueString],
+    ["Priority", payload.priority],
+    ["Due", payload.occurrenceDateTime],
+    ["Taken", payload.effectiveDateTime],
+    ["Authored", payload.authoredOn],
+    ["Note", note],
+  ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+}
+
+function resultLine(record) {
+  if (typeof record === "string") return record;
+  const value = record.valueQuantity ? `${record.valueQuantity.value} ${record.valueQuantity.unit || ""}` : record.valueString || "";
+  const when = record.effectiveDateTime || record.authoredOn || record.performedDateTime || "";
+  return `${record.resourceType}/${record.id}: ${concept(record.code)} ${value} ${when}`.replace(/\s+/g, " ").trim();
+}
+
+function renderStep(step) {
+  if (step.note) return el("li", {class: "note"}, step.note);
+  const args = step.arguments && typeof step.arguments === "object"
+    ? Object.entries(step.arguments).map(([k, v]) => `${k}=${typeof v === "object" ? JSON.stringify(v) : v}`).join(", ")
+    : String(step.arguments);
+  const shortArgs = args.length > 160 ? `${args.slice(0, 160)}...` : args;
+  return el("li", {}, el("code", {}, step.tool), " ", shortArgs, el("br"), el("span", {class: "note"}, step.result));
+}
+
+function renderProposal(proposal) {
+  const what = concept(proposal.payload.medicationCodeableConcept) || concept(proposal.payload.code);
+  const card = el("div", {class: proposal.superseded ? "card superseded" : "card"}, el("h3", {}, what ? `${proposal.resource}: ${what}` : proposal.resource));
+  if (proposal.superseded) card.append(el("div", {class: "findings"}, el("strong", {}, "Superseded. "), "The agent drafted a later order with the same code in this run. Review that one; approving both would order twice."));
+  const facts = el("dl");
+  for (const [key, value] of rowsOf(proposal.payload)) facts.append(el("dt", {}, key), el("dd", {}, value));
+  card.append(facts);
+  const evidence = el("div", {class: "evidence"}, el("strong", {}, "Based on"));
+  if (proposal.evidence.length) for (const record of proposal.evidence) evidence.append(el("div", {}, resultLine(record)));
+  else evidence.append(el("div", {class: "note"}, "No record cited."));
+  card.append(evidence);
+  if (proposal.findings) card.append(el("div", {class: "findings"}, el("strong", {}, "Gates rejected this write. "), proposal.findings));
+  else card.append(el("p", {class: "passed"}, "Gates passed: required fields, value types and every cited record checked."));
+  const outcome = el("p");
+  const approve = el("button", {}, proposal.findings ? "Override and write" : "Approve and write");
+  const reject = el("button", {class: "secondary"}, "Reject");
+  approve.onclick = async () => {
+    approve.disabled = reject.disabled = true;
+    try {
+      const done = await post("/api/commit", {id: proposal.id, override: Boolean(proposal.findings)});
+      outcome.className = done.dropped.length ? "problem" : "written";
+      outcome.textContent = done.dropped.length
+        ? `Written as ${done.reference}, but the server did not store: ${done.dropped.join(", ")}`
+        : `Written as ${done.reference}. Read back: every field stored.`;
+    } catch (error) {
+      outcome.className = "problem";
+      outcome.textContent = error.message;
+      approve.disabled = reject.disabled = false;
+    }
+  };
+  reject.onclick = () => {
+    approve.disabled = reject.disabled = true;
+    outcome.className = "note";
+    outcome.textContent = "Rejected. Nothing written.";
+  };
+  card.append(el("p", {}, approve, " ", reject), outcome);
+  card.append(el("details", {}, el("summary", {}, "Payload"), el("pre", {}, JSON.stringify(proposal.payload, null, 2))));
+  return card;
+}
+
+// An event needs a person when the agent drafted orders, or when the agent could not process it at all.
+const current = (event) => event.proposals.filter((p) => !p.superseded);
+
+function needsPerson(event) {
+  return current(event).length > 0 || event.status !== "completed";
+}
+
+function renderEvent(event) {
+  const ordered = current(event).length > 0;
+  const box = el("div", {class: `event ${needsPerson(event) ? "action" : "quiet"}`});
+  box.append(el("div", {}, el("strong", {}, event.patient), ` · ${event.protocol} · `, resultLine(event.result)));
+  let status;
+  if (event.status !== "completed") status = event.status;
+  else if (ordered) {
+    const n = current(event).length, replaced = event.proposals.length - n;
+    status = `${n} order${n === 1 ? "" : "s"} drafted, waiting for review` + (replaced ? ` (${replaced} earlier draft${replaced === 1 ? "" : "s"} superseded)` : "");
+  }
+  else {
+    const note = event.steps.filter((step) => step.note).map((step) => step.note).pop();
+    status = note ? `No order drafted. Agent note: ${note}` : "No order drafted. The agent's reason is not checked.";
+  }
+  box.append(el("div", {class: needsPerson(event) ? "" : "note"}, status));
+  for (const proposal of event.proposals) box.append(renderProposal(proposal));
+  if (event.steps.length) {
+    const steps = el("ol");
+    for (const step of event.steps) steps.append(renderStep(step));
+    box.append(el("details", {}, el("summary", {}, "Agent steps"), steps));
+  }
+  return box;
+}
+
+async function scan() {
+  $("scan").disabled = true;
+  const started = Date.now();
+  const tick = () => { $("scan-status").textContent = `Checking... ${Math.round((Date.now() - started) / 1000)} s`; };
+  tick();
+  const timer = setInterval(tick, 1000);
+  $("worklist").replaceChildren();
+  $("worklist-summary").textContent = "";
+  try {
+    const patients = $("patients").value.split(/\s+/).filter(Boolean);
+    const {events} = await post("/api/watch", {patients});
+    clearInterval(timer);
+    events.sort((a, b) => needsPerson(b) - needsPerson(a));
+    const actionable = events.filter((e) => current(e).length > 0);
+    const orders = actionable.reduce((n, e) => n + current(e).length, 0);
+    const unprocessed = events.filter((e) => e.status !== "completed").length;
+    $("worklist-empty").hidden = events.length > 0;
+    $("worklist-summary").textContent =
+      `${events.length} new results checked. ${actionable.length} need action: ${orders} orders drafted for review.` +
+      (unprocessed ? ` ${unprocessed} could not be processed by the agent and need a person.` : "");
+    $("worklist").replaceChildren(...events.map(renderEvent));
+    $("scan-status").textContent = "";
+  } catch (error) {
+    clearInterval(timer);
+    $("scan-status").textContent = error.message;
+  }
+  $("scan").disabled = false;
+}
+
+async function ask() {
+  $("run").disabled = true;
+  $("status").textContent = "Running...";
+  $("steps").replaceChildren();
+  $("proposals").replaceChildren();
+  $("answer").textContent = "";
+  try {
+    const result = await post("/api/ask", {context: $("context").value, question: $("question").value});
+    $("steps").replaceChildren(...result.steps.map(renderStep));
+    $("answer").textContent = result.answer === null ? `No answer (${result.status}).` : JSON.stringify(result.answer);
+    $("none").hidden = result.proposals.length > 0;
+    $("proposals").replaceChildren(...result.proposals.map(renderProposal));
+    $("status").textContent = "";
+  } catch (error) {
+    $("status").textContent = error.message;
+  }
+  $("run").disabled = false;
+}
+
+function show(view) {
+  $("watch-view").hidden = view !== "watch";
+  $("ask-view").hidden = view !== "ask";
+  $("tab-watch").className = view === "watch" ? "current" : "";
+  $("tab-ask").className = view === "ask" ? "current" : "";
+}
+
+fetch("/api/mode").then((response) => response.json()).then((mode) => {
+  $("mode").className = mode.replay ? "replay" : "model";
+  $("mode").textContent = mode.replay
+    ? "Replay: the agent's steps are scripted from a file. No model is running."
+    : `Model: ${mode.model}`;
+  $("context").value = mode.ask.context || "";
+  $("question").value = mode.ask.question || "";
+  if (!mode.ward) {
+    $("tab-watch").hidden = true;
+    show("ask");
+    return;
+  }
+  $("ward-meta").textContent = `Results from the ${mode.ward.window_hours} hours before ${mode.ward.now} count as new.`;
+  $("patients").value = mode.ward.patients.join("\n");
+  $("protocols").replaceChildren(...mode.ward.protocols.map((p) =>
+    el("details", {class: "protocol"}, el("summary", {}, `${p.name} (results coded ${p.code})`), el("p", {class: "note"}, p.text))));
+});
+$("tab-watch").onclick = () => show("watch");
+$("tab-ask").onclick = () => show("ask");
+$("scan").onclick = scan;
+$("run").onclick = ask;
+</script>
+</body>
+</html>
