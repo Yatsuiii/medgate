@@ -12,7 +12,7 @@ A results watch for the hospital record: new lab results in, ready-to-sign proto
 
 ## Track
 
-Coding and agentic engineering (fallback: best apps and agents).
+Best Apps and Agents. (Not Coding and Agentic Engineering: the official rules define that track as agents that write, run and test code, and medgate is not one. Stage One is a pass/fail check that a project genuinely attempts its track's goal.)
 
 ## Inspiration
 
@@ -80,6 +80,17 @@ Already measured without a model, so stated as plumbing and not accuracy: script
 - Check that the review's gain holds on other models and longer protocols, and measure how often a reviewer notices a wrong dose.
 - Ask clinicians whether a ready-written order beats an order set with an alert. Nothing here tests that yet. No clinical use is claimed.
 
+## Feedback on Nebius Token Factory, AI Cloud and NVIDIA tools
+
+Written from what happened in this project (the form requires it). Used: Token Factory with Nemotron 3 Super. Not used: AI Cloud, Serverless Endpoints or Jobs.
+
+- **What worked:** the OpenAI-compatible endpoint and native tool calling worked with `nvidia/nemotron-3-super-120b-a12b` with no client changes beyond the base URL and key. Thousands of five-call agent runs cost a small share of the credit, which made it practical to pre-register many tests.
+- **Rate limits:** with 36 requests in flight (six protocols at six workers each) the endpoint returned HTTP 429 and a run stopped after five retries. Eight to 24 in flight was fine. A documented concurrency limit and a `Retry-After` value on 429 would let a client back off instead of failing. I do not know whether either exists; I did not find one while building.
+- **Nemotron behaviour that mattered:** in some runs the model sent a nested array argument (`dosageInstruction`) as a JSON string instead of an array. A schema check on our side caught it and the model corrected it on the next turn. Stricter argument typing for nested arrays in tool calls would remove a class of retries.
+- **Model behaviour we liked:** given a protocol as plain text, it ordered nothing on hold and no-order events in all but a handful of the several thousand runs we made, and it used the retrieved record (an exclusion lab) instead of the number in the prompt.
+- **Model choice:** we also tried Nano, Lightning and Ultra on the same job (partial runs, stopped for budget; docs/MODELS_RESULTS.md). Nano missed orders and spent about 52,000 reasoning tokens per run, so it was not cheaper than Super per run; Lightning looped (about 235,000 prompt tokens per run) and failed; Ultra matched Super on one protocol at about twice the calls. Super was the right size for this job.
+- **Spend visibility:** the console's usage page breaks cost down by model, which is good, but it carries a "last updated" delay and the balance lagged, so I could not watch spend while a batch ran and the balance fell from \$10.64 to \$4.36 during one experiment. A live balance, or the cost of each request in the API response next to the token counts, would let a client stop itself at a budget.
+
 ## Honest limits
 
 - Synthetic benchmark patients. No clinical claims and no clinician has used it.
@@ -95,6 +106,7 @@ python, uv, httpx, fhir, nebius, nemotron, medagentbench
 
 ## Links
 
+- Working demo (a read-only recorded scan of the live model; running it yourself is in the README): [DEMO URL, after enabling GitHub Pages: https://ACCOUNT.github.io/REPO/demo/]
 - Repository: [PUBLIC REPO URL]
 - Demo video (under 3 minutes): [YOUTUBE URL]
 

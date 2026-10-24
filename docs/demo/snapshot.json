@@ -1,0 +1,1100 @@
+{
+ "mode": {
+  "replay": false,
+  "model": "nvidia/nemotron-3-super-120b-a12b",
+  "ask": {
+   "context": "",
+   "question": ""
+  },
+  "ward": {
+   "now": "2023-11-13T10:15:00+00:00",
+   "window_hours": 24.0,
+   "patients": [
+    "S6550627",
+    "S3241217",
+    "S1023381",
+    "S3084624",
+    "S6542579",
+    "S0636132",
+    "S0722219"
+   ],
+   "protocols": [
+    {
+     "name": "Potassium replacement",
+     "code": "K",
+     "text": "Potassium replacement protocol (serum potassium, code K). If the newest potassium is below 3.5 mmol/L, order oral potassium replacement, NDC 40032-917-01, 10 mEq for every 0.1 mmol/L below 3.5, route oral, and pair that order with a serum potassium level, LOINC 2823-3, priority stat, to be drawn the next morning at 08:00. If the potassium is 3.5 or higher, order nothing."
+    },
+    {
+     "name": "Magnesium replacement",
+     "code": "MG",
+     "text": "Magnesium replacement protocol (serum magnesium, code MG, drawn in the last 24 hours). By the newest level, order IV magnesium, NDC 0338-1715-40, route IV: 1.5 to 1.9 mg/dL, 1 g over 1 hour; 1.0 to below 1.5 mg/dL, 2 g over 2 hours; below 1.0 mg/dL, 4 g over 4 hours. Record the dose in g and the duration as a rate in hours. If the level is above 1.9 mg/dL, order nothing. Exclusion: before ordering, check the newest eGFR (code EGFR). If it is below 45 mL/min/1.73m2, do not order magnesium; hold it for pharmacist review."
+    }
+   ]
+  }
+ },
+ "events": [
+  {
+   "patient": "S6550627",
+   "protocol": "Potassium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "330934",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "K",
+    "subject": "Patient/S6550627",
+    "effectiveDateTime": "2023-11-12T14:52:00+00:00",
+    "issued": "2023-11-12T15:57:00+00:00",
+    "valueQuantity": {
+     "value": 3.1,
+     "unit": "mmol/L"
+    },
+    "interpretation": [
+     "LOW (Low)"
+    ]
+   },
+   "status": "completed",
+   "answer": [
+    3.1
+   ],
+   "steps": [
+    {
+     "tool": "medicationrequest_create",
+     "arguments": {
+      "resourceType": "MedicationRequest",
+      "medicationCodeableConcept": {
+       "coding": [
+        {
+         "system": "http://hl7.org/fhir/sid/ndc",
+         "code": "40032-917-01",
+         "display": ""
+        }
+       ],
+       "text": "Oral potassium replacement"
+      },
+      "authoredOn": "2023-11-13T10:15:00+00:00",
+      "dosageInstruction": [
+       {
+        "route": "oral",
+        "doseAndRate": [
+         {
+          "doseQuantity": {
+           "value": 40,
+           "unit": "mEq"
+          }
+         }
+        ]
+       }
+      ],
+      "status": "active",
+      "intent": "order",
+      "subject": {
+       "reference": "Patient/S6550627"
+      },
+      "priority": "routine",
+      "reasonReference": [
+       {
+        "reference": "Observation/330934"
+       }
+      ]
+     },
+     "result": "Accepted: the write is recorded."
+    },
+    {
+     "tool": "servicerequest_create",
+     "arguments": {
+      "resourceType": "ServiceRequest",
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "2823-3",
+         "display": ""
+        }
+       ]
+      },
+      "authoredOn": "2023-11-13T10:15:00+00:00",
+      "status": "active",
+      "intent": "order",
+      "priority": "stat",
+      "subject": {
+       "reference": "Patient/S6550627"
+      },
+      "occurrenceDateTime": "2023-11-14T08:00:00+00:00",
+      "reasonReference": [
+       {
+        "reference": "Observation/330934"
+       }
+      ]
+     },
+     "result": "Accepted: the write is recorded."
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.1
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.1
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": [
+    {
+     "id": "8c8c5ee3a5ba430dac7eebdc184825d8",
+     "resource": "MedicationRequest",
+     "payload": {
+      "resourceType": "MedicationRequest",
+      "medicationCodeableConcept": {
+       "coding": [
+        {
+         "system": "http://hl7.org/fhir/sid/ndc",
+         "code": "40032-917-01",
+         "display": ""
+        }
+       ],
+       "text": "Oral potassium replacement"
+      },
+      "authoredOn": "2023-11-13T10:15:00+00:00",
+      "dosageInstruction": [
+       {
+        "route": "oral",
+        "doseAndRate": [
+         {
+          "doseQuantity": {
+           "value": 40,
+           "unit": "mEq"
+          }
+         }
+        ]
+       }
+      ],
+      "status": "active",
+      "intent": "order",
+      "subject": {
+       "reference": "Patient/S6550627"
+      },
+      "priority": "routine",
+      "reasonReference": [
+       {
+        "reference": "Observation/330934"
+       }
+      ]
+     },
+     "findings": null,
+     "superseded": false,
+     "evidence": [
+      {
+       "resourceType": "Observation",
+       "id": "330934",
+       "status": "final",
+       "category": [
+        "laboratory (Laboratory)"
+       ],
+       "code": "K",
+       "subject": "Patient/S6550627",
+       "effectiveDateTime": "2023-11-12T14:52:00+00:00",
+       "issued": "2023-11-12T15:57:00+00:00",
+       "valueQuantity": {
+        "value": 3.1,
+        "unit": "mmol/L"
+       },
+       "interpretation": [
+        "LOW (Low)"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "be8e25d0ef014598a22c52f36b8c38c5",
+     "resource": "ServiceRequest",
+     "payload": {
+      "resourceType": "ServiceRequest",
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "2823-3",
+         "display": ""
+        }
+       ]
+      },
+      "authoredOn": "2023-11-13T10:15:00+00:00",
+      "status": "active",
+      "intent": "order",
+      "priority": "stat",
+      "subject": {
+       "reference": "Patient/S6550627"
+      },
+      "occurrenceDateTime": "2023-11-14T08:00:00+00:00",
+      "reasonReference": [
+       {
+        "reference": "Observation/330934"
+       }
+      ]
+     },
+     "findings": null,
+     "superseded": false,
+     "evidence": [
+      {
+       "resourceType": "Observation",
+       "id": "330934",
+       "status": "final",
+       "category": [
+        "laboratory (Laboratory)"
+       ],
+       "code": "K",
+       "subject": "Patient/S6550627",
+       "effectiveDateTime": "2023-11-12T14:52:00+00:00",
+       "issued": "2023-11-12T15:57:00+00:00",
+       "valueQuantity": {
+        "value": 3.1,
+        "unit": "mmol/L"
+       },
+       "interpretation": [
+        "LOW (Low)"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "patient": "S3241217",
+   "protocol": "Potassium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "325493",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "K",
+    "subject": "Patient/S3241217",
+    "effectiveDateTime": "2023-11-12T20:36:00+00:00",
+    "issued": "2023-11-12T21:05:00+00:00",
+    "valueQuantity": {
+     "value": 3.9,
+     "unit": "mmol/L"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    3.9
+   ],
+   "steps": [
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.9
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.9
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  },
+  {
+   "patient": "S1023381",
+   "protocol": "Potassium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "279187",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "K",
+    "subject": "Patient/S1023381",
+    "effectiveDateTime": "2023-11-12T13:31:00+00:00",
+    "issued": "2023-11-12T14:12:00+00:00",
+    "valueQuantity": {
+     "value": 3.8,
+     "unit": "mmol/L"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    3.8
+   ],
+   "steps": [
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.8
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.8
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  },
+  {
+   "patient": "S1023381",
+   "protocol": "Magnesium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "279423",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "MG",
+    "subject": "Patient/S1023381",
+    "effectiveDateTime": "2023-11-12T13:31:00+00:00",
+    "issued": "2023-11-12T14:12:00+00:00",
+    "valueQuantity": {
+     "value": 2.0,
+     "unit": "mg/dL"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    2
+   ],
+   "steps": [
+    {
+     "tool": "observation_search_labs",
+     "arguments": {
+      "code": "EGFR",
+      "patient": "S1023381",
+      "_sort": "-date",
+      "_count": 1
+     },
+     "result": "43 results, newest first; showing the first 1. Narrow the search with a date filter, _sort or _count."
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       2
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       2
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  },
+  {
+   "patient": "S3084624",
+   "protocol": "Potassium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "344823",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "K",
+    "subject": "Patient/S3084624",
+    "effectiveDateTime": "2023-11-13T06:40:00+00:00",
+    "issued": "2023-11-13T07:20:00+00:00",
+    "valueQuantity": {
+     "value": 4.0,
+     "unit": "mmol/L"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    4
+   ],
+   "steps": [
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       4
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       4
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  },
+  {
+   "patient": "S3084624",
+   "protocol": "Magnesium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "344826",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "MG",
+    "subject": "Patient/S3084624",
+    "effectiveDateTime": "2023-11-13T06:40:00+00:00",
+    "issued": "2023-11-13T07:14:00+00:00",
+    "valueQuantity": {
+     "value": 1.8,
+     "unit": "mg/dL"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    1.8
+   ],
+   "steps": [
+    {
+     "tool": "observation_search_labs",
+     "arguments": {
+      "code": "EGFR",
+      "patient": "S3084624",
+      "_sort": "-date",
+      "_count": 1
+     },
+     "result": "1 result, newest first."
+    },
+    {
+     "tool": "medicationrequest_create",
+     "arguments": {
+      "resourceType": "MedicationRequest",
+      "medicationCodeableConcept": {
+       "coding": [
+        {
+         "system": "http://hl7.org/fhir/sid/ndc",
+         "code": "0338-1715-40",
+         "display": "Magnesium sulfate injection"
+        }
+       ],
+       "text": "Magnesium sulfate"
+      },
+      "authoredOn": "2023-11-13T10:15:00+00:00",
+      "dosageInstruction": [
+       {
+        "route": "IV",
+        "doseAndRate": [
+         {
+          "doseQuantity": {
+           "value": 1,
+           "unit": "g"
+          },
+          "rateQuantity": {
+           "value": 1,
+           "unit": "h"
+          }
+         }
+        ]
+       },
+       {
+        "route": "IV",
+        "doseAndRate": [
+         {
+          "doseQuantity": {
+           "value": 1,
+           "unit": "g"
+          },
+          "rateQuantity": {
+           "value": 1,
+           "unit": "h"
+          }
+         }
+        ]
+       }
+      ],
+      "status": "active",
+      "intent": "order",
+      "subject": {
+       "reference": "Patient/S3084624"
+      },
+      "priority": "routine",
+      "reasonReference": [
+       {
+        "reference": "Observation/344826"
+       }
+      ]
+     },
+     "result": "Accepted: the write is recorded."
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       1.8
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       1.8
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": [
+    {
+     "id": "193ae72bbd664ec9a7317d8e788bc5b8",
+     "resource": "MedicationRequest",
+     "payload": {
+      "resourceType": "MedicationRequest",
+      "medicationCodeableConcept": {
+       "coding": [
+        {
+         "system": "http://hl7.org/fhir/sid/ndc",
+         "code": "0338-1715-40",
+         "display": "Magnesium sulfate injection"
+        }
+       ],
+       "text": "Magnesium sulfate"
+      },
+      "authoredOn": "2023-11-13T10:15:00+00:00",
+      "dosageInstruction": [
+       {
+        "route": "IV",
+        "doseAndRate": [
+         {
+          "doseQuantity": {
+           "value": 1,
+           "unit": "g"
+          },
+          "rateQuantity": {
+           "value": 1,
+           "unit": "h"
+          }
+         }
+        ]
+       },
+       {
+        "route": "IV",
+        "doseAndRate": [
+         {
+          "doseQuantity": {
+           "value": 1,
+           "unit": "g"
+          },
+          "rateQuantity": {
+           "value": 1,
+           "unit": "h"
+          }
+         }
+        ]
+       }
+      ],
+      "status": "active",
+      "intent": "order",
+      "subject": {
+       "reference": "Patient/S3084624"
+      },
+      "priority": "routine",
+      "reasonReference": [
+       {
+        "reference": "Observation/344826"
+       }
+      ]
+     },
+     "findings": null,
+     "superseded": false,
+     "evidence": [
+      {
+       "resourceType": "Observation",
+       "id": "344826",
+       "status": "final",
+       "category": [
+        "laboratory (Laboratory)"
+       ],
+       "code": "MG",
+       "subject": "Patient/S3084624",
+       "effectiveDateTime": "2023-11-13T06:40:00+00:00",
+       "issued": "2023-11-13T07:14:00+00:00",
+       "valueQuantity": {
+        "value": 1.8,
+        "unit": "mg/dL"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "patient": "S6542579",
+   "protocol": "Potassium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "338603",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "K",
+    "subject": "Patient/S6542579",
+    "effectiveDateTime": "2023-11-13T04:51:00+00:00",
+    "issued": "2023-11-13T05:28:00+00:00",
+    "valueQuantity": {
+     "value": 3.7,
+     "unit": "mmol/L"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    3.7
+   ],
+   "steps": [
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.7
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.7
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  },
+  {
+   "patient": "S6542579",
+   "protocol": "Magnesium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "338686",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "MG",
+    "subject": "Patient/S6542579",
+    "effectiveDateTime": "2023-11-13T04:51:00+00:00",
+    "issued": "2023-11-13T05:28:00+00:00",
+    "valueQuantity": {
+     "value": 1.9,
+     "unit": "mg/dL"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    1.9
+   ],
+   "steps": [
+    {
+     "tool": "observation_search_labs",
+     "arguments": {
+      "code": "EGFR",
+      "patient": "S6542579",
+      "_sort": "-date",
+      "_count": 1
+     },
+     "result": "14 results, newest first; showing the first 1. Narrow the search with a date filter, _sort or _count."
+    },
+    {
+     "tool": "medicationrequest_create",
+     "arguments": {
+      "resourceType": "MedicationRequest",
+      "medicationCodeableConcept": {
+       "coding": [
+        {
+         "system": "http://hl7.org/fhir/sid/ndc",
+         "code": "0338-1715-40",
+         "display": "Magnesium Sulfate"
+        }
+       ],
+       "text": "Magnesium Sulfate IV"
+      },
+      "authoredOn": "2023-11-13T10:15:00+00:00",
+      "dosageInstruction": [
+       {
+        "route": "IV",
+        "doseAndRate": [
+         {
+          "doseQuantity": {
+           "value": 1,
+           "unit": "g"
+          },
+          "rateQuantity": {
+           "value": 1,
+           "unit": "h"
+          }
+         }
+        ],
+        "timing": {
+         "repeat": {
+          "frequency": 1,
+          "period": 1,
+          "periodUnit": "h"
+         }
+        }
+       }
+      ],
+      "status": "active",
+      "intent": "order",
+      "subject": {
+       "reference": "Patient/S6542579"
+      },
+      "priority": "routine",
+      "reasonReference": [
+       {
+        "reference": "Observation/338686"
+       }
+      ]
+     },
+     "result": "Accepted: the write is recorded."
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       1.9
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       1.9
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": [
+    {
+     "id": "92edc482a3994c9baf9fb6f00b801796",
+     "resource": "MedicationRequest",
+     "payload": {
+      "resourceType": "MedicationRequest",
+      "medicationCodeableConcept": {
+       "coding": [
+        {
+         "system": "http://hl7.org/fhir/sid/ndc",
+         "code": "0338-1715-40",
+         "display": "Magnesium Sulfate"
+        }
+       ],
+       "text": "Magnesium Sulfate IV"
+      },
+      "authoredOn": "2023-11-13T10:15:00+00:00",
+      "dosageInstruction": [
+       {
+        "route": "IV",
+        "doseAndRate": [
+         {
+          "doseQuantity": {
+           "value": 1,
+           "unit": "g"
+          },
+          "rateQuantity": {
+           "value": 1,
+           "unit": "h"
+          }
+         }
+        ],
+        "timing": {
+         "repeat": {
+          "frequency": 1,
+          "period": 1,
+          "periodUnit": "h"
+         }
+        }
+       }
+      ],
+      "status": "active",
+      "intent": "order",
+      "subject": {
+       "reference": "Patient/S6542579"
+      },
+      "priority": "routine",
+      "reasonReference": [
+       {
+        "reference": "Observation/338686"
+       }
+      ]
+     },
+     "findings": null,
+     "superseded": false,
+     "evidence": [
+      {
+       "resourceType": "Observation",
+       "id": "338686",
+       "status": "final",
+       "category": [
+        "laboratory (Laboratory)"
+       ],
+       "code": "MG",
+       "subject": "Patient/S6542579",
+       "effectiveDateTime": "2023-11-13T04:51:00+00:00",
+       "issued": "2023-11-13T05:28:00+00:00",
+       "valueQuantity": {
+        "value": 1.9,
+        "unit": "mg/dL"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "patient": "S0636132",
+   "protocol": "Potassium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "296650",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "K",
+    "subject": "Patient/S0636132",
+    "effectiveDateTime": "2023-11-13T00:36:00+00:00",
+    "issued": "2023-11-13T01:40:00+00:00",
+    "valueQuantity": {
+     "value": 4.2,
+     "unit": "mmol/L"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    4.2
+   ],
+   "steps": [
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       4.2
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "note": "The protocol states: \u201cIf the newest potassium is below 3.5\u202fmmol/L, order oral potassium replacement\u2026\u201d.  \nSince the newest potassium for patient S0636132 is 4.2\u202fmmol/L, which is **not** below 3.5\u202fmmol/L, the condition is not met, and the protocol calls for **no orders**. Therefore creating no orders is correct.\n\nFinish with the requested value:\n\n[4.2]"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       4.2
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  },
+  {
+   "patient": "S0636132",
+   "protocol": "Magnesium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "296705",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "MG",
+    "subject": "Patient/S0636132",
+    "effectiveDateTime": "2023-11-13T00:36:00+00:00",
+    "issued": "2023-11-13T01:24:00+00:00",
+    "valueQuantity": {
+     "value": 2.0,
+     "unit": "mg/dL"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    2
+   ],
+   "steps": [
+    {
+     "tool": "observation_search_labs",
+     "arguments": {
+      "code": "EGFR",
+      "patient": "S0636132",
+      "_sort": "-date",
+      "_count": 1
+     },
+     "result": "10 results, newest first; showing the first 1. Narrow the search with a date filter, _sort or _count."
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       2
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       2
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  },
+  {
+   "patient": "S0722219",
+   "protocol": "Potassium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "180170",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "K",
+    "subject": "Patient/S0722219",
+    "effectiveDateTime": "2023-11-13T07:35:00+00:00",
+    "issued": "2023-11-13T08:25:00+00:00",
+    "valueQuantity": {
+     "value": 3.9,
+     "unit": "mmol/L"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    3.9
+   ],
+   "steps": [
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.9
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       3.9
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  },
+  {
+   "patient": "S0722219",
+   "protocol": "Magnesium replacement",
+   "result": {
+    "resourceType": "Observation",
+    "id": "181860",
+    "status": "final",
+    "category": [
+     "laboratory (Laboratory)"
+    ],
+    "code": "MG",
+    "subject": "Patient/S0722219",
+    "effectiveDateTime": "2023-11-13T07:35:00+00:00",
+    "issued": "2023-11-13T08:25:00+00:00",
+    "valueQuantity": {
+     "value": 1.7,
+     "unit": "mg/dL"
+    }
+   },
+   "status": "completed",
+   "answer": [
+    1.7
+   ],
+   "steps": [
+    {
+     "tool": "observation_search_labs",
+     "arguments": {
+      "patient": "S0722219",
+      "code": "MG"
+     },
+     "result": "259 results, newest first; showing the first 216. Narrow the search with a date filter, _sort or _count."
+    },
+    {
+     "tool": "observation_search_labs",
+     "arguments": {
+      "patient": "S0722219",
+      "code": "EGFR",
+      "_count": 1,
+      "_sort": "-date"
+     },
+     "result": "327 results, newest first; showing the first 1. Narrow the search with a date filter, _sort or _count."
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       1.7
+      ]
+     },
+     "result": "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers this result, or say that no sentence does. Compare the result with that sentence's limits exactly as written, and check any condition the sentence names against the record. Say what the s"
+    },
+    {
+     "tool": "finish",
+     "arguments": {
+      "answer": [
+       1.7
+      ]
+     },
+     "result": "Finished."
+    }
+   ],
+   "proposals": []
+  }
+ ]
+}

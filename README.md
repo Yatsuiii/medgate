@@ -104,6 +104,18 @@ The original full design, fixed in Phase 1 before the baseline screen showed arm
 - Statistics: exact McNemar test and a 95 percent paired bootstrap CI (2000 resamples, seed 0) for B3 minus A, plus A vs B1 and B1 vs B2 to attribute the gain.
 - Stop rule: if B3 minus A is under 5 points, or its CI includes zero, report that and stop. No gates added after seeing results.
 
+## Where Nemotron and Nebius are used
+
+- **Model:** `nvidia/nemotron-3-super-120b-a12b` on **Nebius Token Factory**, through its OpenAI-compatible API (`https://api.tokenfactory.nebius.com/v1/`) with native tool calling. Every agent run in this repo, the pilot, the results watch, the protocol bank and the confirmations, makes runtime calls to that endpoint. Nothing here uses another model.
+- **Where Nemotron does the work:** it reads a unit's protocol (plain text), decides from the record whether it applies, checks the exclusions, and drafts the FHIR orders with their citations. No code decides what is abnormal.
+- **Where Token Factory helped:** the evaluation series ran thousands of multi-call agent runs (about five model calls each, eight at a time) for a small share of the credit, which is what made pre-registered tests on many protocols affordable. Feedback on the service is in [docs/SUBMISSION_DRAFT.md](docs/SUBMISSION_DRAFT.md).
+- **Not used:** Nebius AI Cloud, Serverless Endpoints or Jobs. The review screen runs on your machine and calls Token Factory.
+- **To run it with your own key:** put a Token Factory key in `~/.nebius_key` and use the `--base-url`, `--model` and `--key-file` flags shown under Running.
+
+## Hosted demo (read-only)
+
+`docs/demo/index.html` is the review screen with one recorded scan of the demo ward, taken as it came from Nemotron 3 Super on Nebius Token Factory on 2026-10-24: 12 results checked, 3 needing action, 4 orders drafted, none on the held patient. Nothing runs behind it: clicking Check new results shows the saved scan and Approve writes nothing, which the page says. Open the file in a browser, or serve the repository's `docs/` folder with GitHub Pages (Settings, Pages, branch `main`, folder `/docs`, then `/demo/`). Rebuild it with `demo/build_static.py` (needs the FHIR server and a key). To approve and write real orders, run the screen yourself as described under Running.
+
 ## Setup
 
 Requirements: Python 3.12+, [uv](https://docs.astral.sh/uv/), Docker (or Java to run the server natively), about 8 GB of disk for the FHIR server image.
