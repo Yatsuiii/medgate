@@ -18,7 +18,7 @@ from medgate.protocol import GET_RESPONSE, POST_ACCEPTED, POST_INVALID
 from medgate.results import MAX_CHARS
 from medgate.runner import run_arm
 from medgate.tasks import DEFAULT_DATA, load_functions
-from medgate.tool_agent import REMINDER, REVIEW, REVIEW_ROUNDS, review_message, run_tool_task
+from medgate.tool_agent import RE_REVIEW, REMINDER, REVIEW, REVIEW_ROUNDS, review_message, run_tool_task
 from medgate.tools import FETCH_ALL, fhir_tools, search_url, tool_definitions
 
 BASE = "http://localhost:8080/fhir/"
@@ -375,6 +375,7 @@ def test_the_review_lists_the_orders_created_so_far_and_a_later_order_is_recorde
             finish([]),
             turn(call("servicerequest_create", other)),
             finish([]),
+            finish([]),
         ],
         WATCH,
     )
@@ -387,6 +388,34 @@ def test_the_review_lists_the_orders_created_so_far_and_a_later_order_is_recorde
 def test_the_review_fires_once_however_often_the_model_finishes() -> None:
     result, llm = play([finish([]), finish([]), finish([])], WATCH)
     assert len(review_replies(result)) == 1 and len(llm.seen) == 2  # the second finish completes the task
+
+
+def re_review_replies(result: TaskResult) -> list[str]:
+    return [r for r in tool_replies(result) if r.startswith(RE_REVIEW[:40])]
+
+
+def test_an_order_written_after_the_review_gets_one_more_review_of_the_whole_list() -> None:
+    other = {"status": "active", "subject": {"reference": "Patient/S100"}, "priority": "stat"}
+    result, llm = play(
+        [
+            turn(call("servicerequest_create", ORDER)),
+            finish([]),
+            turn(call("servicerequest_create", other)),
+            finish([]),
+            turn(call("servicerequest_create", other, "c3")),
+            finish([]),
+        ],
+        WATCH,
+    )
+    (again,) = re_review_replies(result)
+    assert again.startswith(RE_REVIEW) and json.dumps({"resourceType": "ServiceRequest", **ORDER}) in again
+    assert '"priority": "stat"' in again  # the order written after the first review is in the list
+    assert result.status is Status.COMPLETED and len(llm.seen) == 6  # a third order is not reviewed a third time
+
+
+def test_no_new_order_after_the_review_means_no_second_review() -> None:
+    result, _ = play([turn(call("servicerequest_create", ORDER)), finish([]), finish([])], WATCH)
+    assert not re_review_replies(result) and result.status is Status.COMPLETED
 
 
 def test_a_badly_formatted_first_finish_is_nudged_before_the_review_and_the_nudge_counts_as_a_retry() -> None:
@@ -404,7 +433,7 @@ def test_the_review_does_not_use_up_the_round_limit() -> None:
     assert (
         result.status is Status.COMPLETED
     )  # 7 searches, a finish, the review, a finish: 9 model calls, limit is 8 + 3
-    assert REVIEW_ROUNDS == 3
+    assert REVIEW_ROUNDS == 6
 
 
 def test_a_prose_only_reply_after_the_review_gets_the_reminder_and_the_task_still_completes() -> None:

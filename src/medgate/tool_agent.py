@@ -30,7 +30,7 @@ from medgate.loop import Status, TaskResult
 from medgate.protocol import GET_ERROR, GET_RESPONSE, MAX_ROUNDS, POST_ACCEPTED, POST_INVALID
 from medgate.tools import FhirTool, fhir_tools, search_url, tool_definitions
 
-REVIEW_ROUNDS = 3  # the review reply, a prose-only reminder round, and the finish that follows
+REVIEW_ROUNDS = 6  # per review: the reply, a prose-only reminder round, and the finish that follows; at most two
 
 REVIEW = (
     "Before you finish, check your decision against the protocol text. Quote the sentence of the protocol that covers "
@@ -41,13 +41,25 @@ REVIEW = (
     "is correct if the protocol requires none."
 )
 
+RE_REVIEW = (
+    "You created or changed orders after the review. Check the whole list below once more against the protocol "
+    "sentence: does it call for any order that is not in the list, such as a paired recheck, a second test or a "
+    "second drug? Create what is missing, then call finish. If the list is complete, call finish again unchanged."
+)
 
-def review_message(orders: list[dict[str, Any]]) -> str:
+FIELD_CHECK = (
+    "Then check each order field by field against that sentence: the drug or test code, the route, the dose with its "
+    "unit, the rate or duration, how often it is given, the priority and the time. Every item the sentence states "
+    "must appear in the order; one left out is an error even if the order looks complete."
+)
+
+
+def review_message(orders: list[dict[str, Any]], field_check: bool = False, again: bool = False) -> str:
     """The review text followed by the orders the agent has created so far, one JSON object per line."""
     listed = (
         "Orders you created:\n" + "\n".join(json.dumps(o) for o in orders) if orders else "You have created no orders."
     )
-    return f"{REVIEW}\n\n{listed}"
+    return f"{RE_REVIEW if again else REVIEW}{' ' + FIELD_CHECK if field_check else ''}\n\n{listed}"
 
 
 _NUMBER = re.compile(r"-?\d+(?:\.\d+)?")
@@ -128,6 +140,8 @@ class _Task:
         self._evidence = f"{case['context']}\n{case['instruction']}"
         self._nudged = False
         self._reviewed = False
+        self._reviewed_orders = 0  # orders accepted when the review was shown
+        self._re_reviewed = False
         self._accepted: list[dict[str, Any]] = []  # payloads of the writes accepted so far, shown back at the review
         self.definitions = tool_definitions(self._tools)
 
@@ -209,7 +223,11 @@ class _Task:
             return f"Check the answer: {'; '.join(problems)}. Call finish again, corrected or unchanged."
         if self._cfg.finish_review and not self._reviewed:
             self._reviewed = True
-            return review_message(self._accepted)
+            self._reviewed_orders = len(self._accepted)
+            return review_message(self._accepted, self._cfg.field_check)
+        if self._cfg.finish_review and not self._re_reviewed and len(self._accepted) != self._reviewed_orders:
+            self._re_reviewed = True  # an order written after the review is checked once, as the first ones were
+            return review_message(self._accepted, self._cfg.field_check, again=True)
         self._result.status, self._result.result = Status.COMPLETED, json.dumps(answer)
         self._result.history.append({"role": "agent", "content": f"FINISH({self._result.result})"})
         return "Finished."

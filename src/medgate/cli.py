@@ -11,7 +11,7 @@ from medgate.fhir import FhirClient
 from medgate.llm import Llm, OpenAiCompatibleLlm, ScriptedLlm, ToolCall, Turn
 from medgate.protocol import MAX_ROUNDS
 from medgate.runner import ARMS, TOOL_ARMS, load_records, run_arm
-from medgate.tasks import load_functions, load_tasks
+from medgate.tasks import load_functions, load_tasks, watch_functions
 from medgate.watch import load_ward
 from medgate.web import ReviewApp, ReviewServer, load_replay
 
@@ -122,7 +122,7 @@ def _serve(args: argparse.Namespace) -> int:
         print("the FHIR server is not answering on localhost:8080", file=sys.stderr)
         return 2
     ward = load_ward(args.ward) if args.ward is not None else None
-    server = ReviewServer(ReviewApp(llm_for, fhir, load_functions(), mode, ward), args.port)
+    server = ReviewServer(ReviewApp(llm_for, fhir, watch_functions(), mode, ward), args.port)
     print(f"review screen: http://127.0.0.1:{server.server_port}/  (Ctrl+C to stop)")
     try:
         server.serve_forever()

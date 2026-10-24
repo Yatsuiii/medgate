@@ -1,12 +1,15 @@
 # Demo script (target 2:40, limit 3:00)
 
-Screen recording of the review screen, from a live run against Nemotron on Nebius, not the replay. Every `[BRACKETED]` item comes from the real run. If the replay is shown instead, the page labels it as scripted and the voice-over must say so.
+Screen recording of the review screen, from a live run against Nemotron on Nebius, not the replay. The numbers below are from the rehearsal; re-check them on the take. If the replay is shown instead, the page labels it as scripted and the voice-over must say so.
 
 Start the screen before recording:
 
 ```bash
-uv run medgate serve --ward demo/ward.json --model [MODEL] --base-url [URL] --key-file [KEY_FILE]
+uv run medgate serve --ward demo/ward.json --model nvidia/nemotron-3-super-120b-a12b \
+  --base-url https://api.tokenfactory.nebius.com/v1/ --key-file ~/.nebius_key --max-tokens 8192
 ```
+
+Open http://127.0.0.1:8765. Dress rehearsal 2026-10-22 on the live model, four scans in a row, identical each time: about 18 seconds, 12 results checked, 3 results needing action, 4 orders (potassium 3.1: 2, magnesium 1.8: 1, magnesium 1.9: 1), 0 orders on the other 9 including the held one. Nothing was approved, so the server stayed at its baseline counts. A scan is stochastic, so check the worklist matches the lines below before talking over it.
 
 ## 0:00 to 0:20, the pain
 
@@ -24,19 +27,19 @@ Say: "This is a ward of seven synthetic patients and two protocols in plain text
 
 On screen: click Check new results. Wait for the summary line. Open the potassium card for S6550627.
 
-Say: "[N] new results checked. [K] need action, [ORDERS] orders drafted. This potassium of 3.1 is below the protocol line, so it drafted an oral replacement, 40 milliequivalents, and the paired recheck, stat, next morning at 8. Each order says what it is based on, the lab result itself, and the gates checked that the record it cites was really retrieved."
+Say: "Twelve new results checked. Three need action, four orders drafted. This potassium of 3.1 is below the protocol line, so it drafted an oral replacement, 40 milliequivalents, and the paired recheck, stat, next morning at 8. Each order says what it is based on, the lab result itself, and the gates checked that the record it cites was really retrieved."
 
 ## 1:25 to 1:50, the hold
 
-On screen: scroll to S0722219 magnesium. Show the agent note.
+On screen: scroll to S0722219 magnesium. The card says no order drafted; open its steps and show the eGFR lookup. The page does not show the agent's reason (it prints "The agent's reason is not checked"), so do not read one out.
 
-Say: "This magnesium is low too, 1.7. The agent did not order. It looked up the kidney function, an eGFR of 41, found the protocol's exclusion and held it for a pharmacist. It checked something in the record, not just the number it was given."
+Say: "This magnesium is low too, 1.7, and the agent drafted nothing. In its steps it looked up the kidney function first. The protocol excludes patients with an eGFR under 45, and this patient's is 41. It checked the record, not only the number it was given. The page shows no order and does not check the agent's reason, which is why a person still reads this row."
 
-(Use the real run's wording. If the live agent orders here, show that honestly and say it missed the exclusion.)
+(If the live agent orders here, show that honestly and say it missed the exclusion. The rehearsal drafted nothing on all four scans.)
 
 ## 1:50 to 2:10, one tap, then the chart
 
-On screen: click Approve and write on a magnesium order. Show the written order with its route and dose.
+On screen: click Approve and write on the S6542579 magnesium order (rate unit h, the form the check expects; the S3084624 one writes g/h). Show the written order with its route and dose.
 
 Say: "Nothing was in the chart until this click. Now it is written as standard FHIR, read back from the server and compared field by field. Here it is: IV, 1 gram over 1 hour, with the citation intact."
 

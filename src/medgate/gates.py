@@ -3,8 +3,10 @@
 Each gate returns a list of problems. An empty list means the action may proceed.
 """
 
+import re
 from collections.abc import Iterator
 from dataclasses import dataclass, replace
+from datetime import datetime
 from typing import Any, cast
 
 WRITE_RESOURCES = ("Observation", "MedicationRequest", "ServiceRequest")
@@ -38,6 +40,8 @@ class GateConfig:
     validate_payload: bool = False
     require_evidence: bool = False
     finish_review: bool = False  # the tool agent audits its decision once before its first accepted finish
+    field_check: bool = False  # that review also has the agent check each order field by field (tool_agent.FIELD_CHECK)
+    check_times: bool = False  # a write is rejected if a date or time field is not valid ISO 8601 (time_problems)
 
 
 REFERENCE = GateConfig()
@@ -45,6 +49,7 @@ FORMAT_ONLY = GateConfig(format_retry=True)
 WITH_VALIDATION = GateConfig(format_retry=True, validate_payload=True)
 FULL = GateConfig(format_retry=True, validate_payload=True, require_evidence=True)
 WATCH = replace(FULL, finish_review=True)
+WATCH_CHECKED = replace(WATCH, field_check=True, check_times=True)
 
 
 def resource_type_of(url: str) -> str | None:
@@ -127,6 +132,33 @@ def evidence_problems(payload: Any, evidence_text: str) -> list[str]:
     ]
 
 
+_ISO_TIME = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})")
+
+
+def time_problems(payload: Any) -> list[str]:
+    """A date or time field (authoredOn, or any name ending in DateTime) that is not valid ISO 8601 with a zone.
+
+    Seen in model output: "2023-11-11-13T10:15:00+00:00" and "2023-11-13T10:10:45:00+00:00". The server may store
+    such a value as text, and nothing downstream could read it as a time.
+    """
+    if not isinstance(payload, dict):
+        return []
+    found: list[str] = []
+    for name, value in cast(dict[str, Any], payload).items():
+        if (name == "authoredOn" or name.endswith("DateTime")) and isinstance(value, str):
+            try:  # the pattern is strict because fromisoformat's leniency differs between Python versions
+                ok = _ISO_TIME.fullmatch(value) is not None
+                if ok:
+                    datetime.fromisoformat(value)  # rejects impossible dates such as month 13
+            except ValueError:
+                ok = False
+            if not ok:
+                found.append(
+                    f"{name}: {value!r} is not an ISO 8601 date and time with a zone, such as 2023-11-13T08:00:00+00:00"
+                )
+    return found
+
+
 def write_problems(
     url: str, payload: Any, functions: list[dict[str, Any]], cfg: GateConfig, evidence_text: str
 ) -> list[str]:
@@ -134,6 +166,8 @@ def write_problems(
     problems: list[str] = []
     if cfg.validate_payload:
         problems = spec_problems(url, payload, functions)
+    if not problems and cfg.check_times:
+        problems = time_problems(payload)
     if not problems and cfg.require_evidence:
         problems = evidence_problems(payload, evidence_text)
     return problems
