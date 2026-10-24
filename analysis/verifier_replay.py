@@ -107,7 +107,7 @@ def parse(text: str) -> tuple[str, str]:
     return (match.group(1) if match else "unparsed", reason.group(1) if reason else text[:200])
 
 
-def run(model: str, label: str, workers: int) -> None:
+def run(model: str, label: str, workers: int, max_completion: int | None = None) -> None:
     keys = json.loads((OUT / "sample.json").read_text())
     fhir = FhirClient()
     texts = {n: json.loads(bank_run.ward_path(n).read_text())["protocols"][0]["text"] for n in NAMES}
@@ -138,10 +138,19 @@ def run(model: str, label: str, workers: int) -> None:
         }
 
     todo = [k for k in keys if (k["protocol"], k["event"], k["repeat"]) not in done]
+    spent = 0
     with out.open("a") as sink, ThreadPoolExecutor(workers) as pool:
-        for result in pool.map(one, todo):
+        futures = [pool.submit(one, k) for k in todo]
+        for future in futures:
+            result = future.result()
             sink.write(json.dumps(result) + "\n")
             sink.flush()
+            spent += result["completion_tokens"]
+            if max_completion is not None and spent > max_completion:  # a spend cap: stop what has not started
+                for pending in futures:
+                    pending.cancel()
+                print(f"stopped: {spent} completion tokens passed the cap of {max_completion}")
+                break
 
 
 def report(label: str) -> None:
@@ -171,12 +180,13 @@ def main() -> None:
     r.add_argument("model")
     r.add_argument("label")
     r.add_argument("--workers", type=int, default=6)
+    r.add_argument("--max-completion", type=int, default=None, help="stop after this many completion tokens")
     sub.add_parser("report").add_argument("label")
     args = parser.parse_args()
     if args.command == "sample":
         sample()
     elif args.command == "run":
-        run(args.model, args.label, args.workers)
+        run(args.model, args.label, args.workers, args.max_completion)
     else:
         report(args.label)
 
