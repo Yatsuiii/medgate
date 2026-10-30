@@ -8,7 +8,7 @@ medgate
 
 ## Tagline
 
-A results watch for the hospital record: new lab results in, ready-to-sign protocol orders out, nothing written until a clinician approves. Nemotron on Nebius.
+The lab result came back wrong. Nobody saw it for hours. medgate has the order ready when someone looks. Nemotron on Nebius.
 
 ## Track
 
@@ -16,7 +16,11 @@ Best Apps and Agents. (Not Coding and Agentic Engineering: the official rules de
 
 ## Inspiration
 
-Abnormal lab results get acted on late or not at all. A systematic review of 19 outpatient studies found 6.8% to 62% of laboratory tests were never followed up, with hospital visits for high potassium after a missed result among the harms (Callen 2012). Doctors in one study received about 77 inbox notifications a day, a fifth of them test results (Murphy 2016). And even where a nurse protocol exists, one ward still took 112 minutes from a low result to the dose, down from 344 (Gopalsami 2023). Protocols help a great deal. They still wait for a person to notice the result and build the order.
+A hospital runs on people remembering things. Someone has to notice that a patient's potassium is low, recall what the unit's protocol says to do, work out the dose, write the order, and remember to recheck in the morning, between twenty other patients. When one of those steps slips, the patient waits, and nobody did anything careless. The system just asked a tired person to be the safety net.
+
+The research agrees that it slips. Between 6.8% and 62% of outpatient lab tests were never followed up in one review of 19 studies (Callen 2012), and even a ward with a good nurse protocol took 112 minutes from result to dose (Gopalsami 2023).
+
+We wanted the order to be waiting when the person looks, so their time goes to judging it instead of building it.
 
 Sources and what was checked on the primary page are in docs/PAIN.md.
 
@@ -41,19 +45,15 @@ The same screen also answers a question about one patient.
 
 ## What we measured
 
-Fixed before any model output (docs/PILOT_PREREG.md, sha256 in NOTES.md): 30 tasks, 3 per category, Nemotron on the benchmark's reference loop (A) and our tool agent (T), one run per task, graded by the benchmark's own grader.
+Every test was written down, with its pass line, before the model ran. We report the ones that failed.
 
-- A: 13/30. T: 27/30. Only T correct on 15 tasks, only A correct on 1 (McNemar exact p = 0.0005). With 30 tasks a 95% interval is about plus or minus 17 points, so this is a pilot. Same model, only the harness changed.
-- T's three failures by class: retrieval 2 (a patient name put whole into the given-name field with no retry; a 24-hour average built from 2 of 4 results because the FHIR server's date filter dropped in-window records), payload 1 (a patient reference without its `Patient/` prefix, which the gates as built do not catch). Classified by three independent readers per failure, then a vote.
-- The decision rule applied as written: 27 of 30 is the "27 or more" line, so there is little room for gates, and the claim that gates raise task success is dropped. We make no claim of parity with GPT-4.1's published 91.0%: the harness differs and 30 tasks is a pilot.
-- The watch on the demo ward, 36 runs on Nemotron under criteria fixed beforehand: 23 of 27 graded runs correct (bar 22), nothing ordered on the 9 runs where the protocol says not to (including a kidney-function hold), and every drafted order cites its lab result. That met the criteria narrowly. The failures were mostly silent misses: the agent finished without ordering what the protocol calls for, and the structural gates do not see that.
-- The fix, tested on 44 held-out events from patients never on the demo ward (criteria fixed before the run, both arms side by side): a one-time review, in which the agent is shown its own orders and asked to check them against the protocol text before it finishes. Silent misses on the 12 events that need orders went from 33 of 120 runs to 0, with no false orders in 134 runs each and no order on the event that should be held. Complete and accurate order sets rose from 62% to 90%. The cost is about 1.3 more model calls per run. A side effect we found: in 6% of runs the review leads the agent to create a corrected order next to the original, so the screen marks the earlier draft superseded.
+- **Benchmark pilot (30 tasks, Stanford's own grader):** the same Nemotron scored 13/30 on the benchmark's reference loop and 27/30 with our tool-calling agent. 30 tasks is a pilot.
+- **Protocols the agent had never seen, written only as plain text:** 407 of 440 orders right (92.5%), with no order on any hold event and no false order. That was the second clean attempt. The first scored 88.3% and we called it caution.
+- **A set that failed:** the third set scored 53% as registered, because our own grader rejected a correct default. We fixed the grader, rescored from saved transcripts (93%), and labelled it after the fact.
+- **A second Nemotron as checker:** Super or Ultra, seeing only the protocol, the record values and the drafted orders, caught 31 of 33 (Super) and 30 of 33 (Ultra) wrong order sets and flagged none of 80 correct ones, for about $0.08 of tokens. This measures detection only. Feeding its findings back to the drafter is untested.
+- **Against a simple rule script:** the script wins on accuracy. What the agent adds is that a unit writes a protocol as text instead of code.
 
-- Against a hand-coded rule script on the same held-out events, the rule wins on accuracy (12 of 12 against the agent's 90% end to end, no model, 26 lines). We said so before running it (docs/RULESET_PREREG.md). What the agent adds is that a unit writes a protocol as text instead of code, so we tested that on protocols nobody tuned for.
-- A calcium protocol (a relative recheck time, an albumin hold) scored 64 of 80 (80%) against our 90% bar, so that claim failed the first time. Most of the gap was the rate written as `1 g/h` instead of hours.
-- A bank of 7 more protocols, each with an independent oracle, a judge and a rule script, designed and cross-checked by separate model agents. Four were used to find problems, three were frozen as a test. The frozen test failed as run (43% against an 85% floor) because the order tool for drugs had no field for priority. After adding standard FHIR fields for frequency, duration and priority to the watch's tool, the three protocols scored 254 of 256 for the watch (the labelled follow-up, made after seeing the test, so not a clean pass). A clean confirmation on three fresh protocols (frozen code, criteria fixed first) scored 332 of 376 (88.3%) for the watch against a 90% bar, with no order on any hold event and no false order, so the verdict is caution (docs/CONFIRM_RESULTS.md). The failures were orders accepted with no route or no infusion duration, so the watch's drug order tool now requires a route and a dose. On three more protocols nobody had run (frozen code, criteria fixed first) it scored 407 of 440 (92.5%), met every criterion, with no order on any hold event and no false order (docs/CONFIRM2_RESULTS.md). It is the second clean attempt, after a first at 88.3%. A third set, after a second finish-time review for orders written late, failed as pre-registered (128 of 240) because one protocol's judge rejected an omitted timing that the tool defines as a single dose; rescored from the saved transcripts with that one judge change it is 224 of 240 (93.3%), labelled post hoc (docs/CONFIRM3_RESULTS.md). A separate-model verifier (a second Nemotron, Super or Ultra, that sees only the protocol, the record values and the drafted orders) caught 31 of 33 (Super) and 30 of 33 (Ultra) wrong or incomplete order sets and wrongly flagged none of 80 correct ones in a replay on saved runs, for about \$0.08 of tokens; it measures detection, and feeding its findings back to the drafter is untested (docs/VERIFIER_RESULTS.md). Prompt changes (a field-by-field check, a time gate) helped on one dev protocol and not on the test; the tool fixes were what mattered.
-
-Already measured without a model, so stated as plumbing and not accuracy: scripted correct agent runs for the 9 of 12 demo events that belong to benchmark patients of the matching task are graded correct by the benchmark's grader, every order cites its result, and an approved order reads back whole.
+Details and every failure: docs/ in the repository.
 
 ## Challenges
 
@@ -106,8 +106,8 @@ python, uv, httpx, fhir, nebius, nemotron, medagentbench
 
 ## Links
 
-- Working demo (a read-only recorded scan of the live model; running it yourself is in the README): [DEMO URL, after enabling GitHub Pages: https://ACCOUNT.github.io/REPO/demo/]
-- Repository: [PUBLIC REPO URL]
+- Working demo (a read-only recorded scan of the live model; running it yourself is in the README): https://yatsuiii.github.io/medgate/demo/
+- Repository: https://github.com/Yatsuiii/medgate
 - Demo video (under 3 minutes): [YOUTUBE URL]
 
 ## Notes for the form

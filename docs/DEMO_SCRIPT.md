@@ -45,15 +45,15 @@ Say: "Nothing was in the chart until this click. Now it is written as standard F
 
 Delete the written order afterwards, off camera, so the server returns to its baseline counts.
 
-## 2:10 to 2:35, the numbers
+## 2:10 to 2:40, the numbers
 
-On screen: the output of `medgate pilot runs/pilot_A.jsonl runs/pilot_T.jsonl`.
+On screen: the Results section of the README, then the Nebius and NVIDIA section.
 
-Say: "We fixed this pilot before any output: 30 benchmark tasks, graded by Stanford's own grader. The same model, Nemotron on Nebius, got 13 of 30 on the benchmark's reference loop and 27 of 30 with our tool-calling agent. Our rule said that at 27 or more there is little room for the checks to raise success, so we dropped that claim. The harness is what mattered. Then we found the agent sometimes finished without ordering. A one-time self-review before it finishes took that from 33 of 120 runs to zero on events it had never seen, with no false orders. It costs about one more model call per result."
+Say: "We wrote down our tests before running them. On three protocols the agent had never seen, written only as plain text, Nemotron Super on Nebius got 407 of 440 orders right, 92.5 percent, with no unsafe order. The next set failed our own rule, 53 percent, because our grader rejected a correct default. We reported that, fixed the grader, and rescored from saved transcripts: 93 percent, labelled after the fact. A second Nemotron checking the drafts caught 31 of 33 wrong order sets and raised no false alarm on 80 correct ones. That is detection only. We did not test whether the drafter fixes them."
 
-## 2:35 to 2:55, the honest limits
+## 2:40 to 2:58, the honest limits
 
-Say: "Synthetic patients, no clinician has used this, and 30 tasks is a pilot. The claim that a ready-written order beats an order set with an alert is a hypothesis nobody has tested. The kidney threshold in the demo is invented."
+Say: "Synthetic patients, one model, no clinician has used this. Protocols and graders were written by a model. Whether a ready-written order beats an order set with an alert is untested. The kidney threshold in the demo is invented."
 
 ## Recording checklist
 

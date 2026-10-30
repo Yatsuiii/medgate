@@ -5,58 +5,96 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>medgate review</title>
 <style>
-  :root { --ink: #1b1f24; --muted: #5b6672; --line: #d9dee3; --bg: #f6f7f9; --card: #fff;
-          --ok: #1f7a4d; --warn: #a15c00; --bad: #b42318; --accent: #2457c5; }
-  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--bg); }
-  header { padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--card); }
-  h1 { font-size: 19px; margin: 0; }
-  h2 { font-size: 15px; margin: 18px 0 6px; }
-  header p { margin: 4px 0 0; color: var(--muted); }
-  #mode { margin-top: 8px; display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
-  #mode.replay { background: #fff4e0; color: var(--warn); }
-  #mode.model { background: #e8f0fe; color: var(--accent); }
-  nav { margin-top: 12px; display: flex; gap: 6px; }
-  nav button { background: #fff; color: var(--ink); border-color: var(--line); }
-  nav button.current { background: var(--ink); color: #fff; border-color: var(--ink); }
-  main { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.4fr); gap: 20px; padding: 20px 24px; }
-  section { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  :root { --ink: #14212b; --muted: #5d6b77; --line: #dbe2e8; --bg: #eef2f5; --card: #fff;
+          --navy: #0b2230; --navy2: #12384d; --teal: #0f9d8a; --teal-soft: #e3f5f2;
+          --ok: #17794c; --ok-soft: #e6f4ec; --warn: #a15c00; --warn-soft: #fff3de;
+          --bad: #b42318; --bad-soft: #fdeceb; --accent: #1f5fd1; --accent-soft: #e8f0fe; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); }
+  header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%); color: #fff; padding: 20px 28px 0; }
+  .top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .logo { width: 38px; height: 38px; border-radius: 10px; background: var(--teal); display: grid; place-items: center; }
+  .brand { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+  .brand small { display: block; font-size: 12.5px; font-weight: 400; color: #a9c1cf; letter-spacing: 0; margin-top: 1px; }
+  #mode { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; font-size: 13px;
+          background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); color: #e8f3f8; }
+  #mode::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #5fd7a0; }
+  #mode.replay::before { background: #ffbf5e; }
+  .lede { margin: 14px 0 0; max-width: 920px; color: #c9dbe5; }
+  .flow { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 0; }
+  .flow span { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #d7e7ef; }
+  .flow b { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,.14); display: grid; place-items: center; font-size: 12px; }
+  .flow i { color: #6f92a5; font-style: normal; margin: 0 4px; }
+  nav { margin-top: 18px; display: flex; gap: 4px; }
+  nav button { background: transparent; color: #b9d0dc; border: 0; border-radius: 8px 8px 0 0; padding: 10px 16px; font-weight: 600; }
+  nav button.current { background: var(--bg); color: var(--ink); }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 22px 0 8px; }
+  h2:first-child { margin-top: 0; }
+  main { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(380px, 1.7fr); gap: 20px; padding: 22px 28px 40px; align-items: start; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; box-shadow: 0 1px 2px rgba(11,34,48,.05); }
   label { display: block; font-weight: 600; margin: 8px 0 4px; }
-  textarea { width: 100%; box-sizing: border-box; font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
-  button { font: inherit; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent);
+  textarea { width: 100%; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f9fbfc; }
+  button { font: inherit; font-weight: 600; padding: 9px 18px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent);
            color: #fff; cursor: pointer; }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  #scan { background: var(--teal); border-color: var(--teal); padding: 11px 22px; font-size: 15px; }
   button.secondary { background: #fff; color: var(--ink); border-color: var(--line); }
+  button.approve { background: var(--ok); border-color: var(--ok); }
+  button.override { background: var(--bad); border-color: var(--bad); }
   button:disabled { opacity: .5; cursor: default; }
   ol { padding-left: 20px; margin: 0; }
   li { margin: 6px 0; }
   .note { color: var(--muted); }
+  code { font-size: 13px; background: #eef2f5; padding: 1px 5px; border-radius: 4px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 0 0 14px; }
+  .kpi { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; background: #fbfcfd; }
+  .kpi b { display: block; font-size: 26px; line-height: 1.1; }
+  .kpi span { font-size: 12.5px; color: var(--muted); }
+  .kpi.action { background: var(--warn-soft); border-color: #f0d9aa; } .kpi.action b { color: var(--warn); }
+  .kpi.orders { background: var(--teal-soft); border-color: #b9e4dd; } .kpi.orders b { color: var(--teal); }
+  .kpi.alert { background: var(--bad-soft); border-color: #f2c7c3; } .kpi.alert b { color: var(--bad); }
+  .event { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 12px 0; background: #fff; }
+  .event.action { border-left: 5px solid var(--warn); box-shadow: 0 2px 8px rgba(161,92,0,.08); }
+  .event.quiet { border-left: 5px solid #c4ced6; background: #fafbfc; }
+  .ev-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .mrn { font: 600 13px ui-monospace, Menlo, monospace; background: var(--navy); color: #fff; padding: 3px 9px; border-radius: 6px; }
+  .proto { color: var(--muted); font-size: 13.5px; }
+  .lab { margin-left: auto; font-weight: 700; font-size: 15px; background: var(--accent-soft); color: var(--accent); padding: 3px 11px; border-radius: 999px; }
+  .badge { display: inline-block; margin: 8px 0 2px; padding: 3px 11px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .badge.act { background: var(--warn-soft); color: var(--warn); }
+  .badge.none { background: #edf1f4; color: var(--muted); font-weight: 500; }
+  .badge.err { background: var(--bad-soft); color: var(--bad); }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 10px 0; background: #fff; }
   .card.superseded { opacity: 0.6; }
-  code { font-size: 13px; background: #f0f2f4; padding: 1px 4px; border-radius: 3px; }
-  .card { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: #fff; }
-  .card h3 { margin: 0 0 6px; font-size: 16px; }
-  dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 6px 0; }
+  .card h3 { margin: 0 0 6px; font-size: 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .kind { font-size: 11.5px; font-weight: 700; letter-spacing: .02em; padding: 2px 9px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); }
+  .kind.lab { margin-left: 0; background: var(--teal-soft); color: var(--teal); border-radius: 5px; font-size: 11.5px; padding: 2px 8px; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 16px; margin: 8px 0; }
   dt { color: var(--muted); }
-  dd { margin: 0; }
-  .evidence { background: #f3f8f5; border-left: 3px solid var(--ok); padding: 6px 10px; margin: 8px 0; }
-  .findings { background: #fdf0ef; border-left: 3px solid var(--bad); padding: 6px 10px; margin: 8px 0; }
-  .passed { color: var(--ok); margin: 6px 0; }
+  dd { margin: 0; font-weight: 500; }
+  .evidence { background: var(--ok-soft); border-left: 3px solid var(--ok); border-radius: 0 8px 8px 0; padding: 7px 12px; margin: 10px 0; font-size: 14px; }
+  .findings { background: var(--bad-soft); border-left: 3px solid var(--bad); border-radius: 0 8px 8px 0; padding: 7px 12px; margin: 10px 0; font-size: 14px; }
+  .passed { color: var(--ok); margin: 6px 0; font-size: 14px; }
   .written { color: var(--ok); font-weight: 600; }
   .problem { color: var(--bad); font-weight: 600; }
-  .event { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 12px 0; background: #fbfcfd; }
-  .event.action { border-left: 4px solid var(--warn); }
-  .event.quiet { border-left: 4px solid var(--line); }
-  .summary { font-weight: 600; margin: 4px 0 8px; }
+  .summary { margin: 0; }
   pre { white-space: pre-wrap; font-size: 12px; margin: 4px 0; }
+  details > summary { cursor: pointer; color: var(--muted); font-size: 13.5px; }
   .protocol { margin: 6px 0; }
   [hidden] { display: none !important; }
-  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } header { padding: 16px 16px 0; } main { padding: 16px; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>medgate: review before the chart</h1>
-  <p>The agent applies your unit's protocols to new results and drafts the orders. Every order shows the result it is
+  <div class="top">
+    <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div>
+    <div class="brand">medgate<small>Results watch: review before the chart</small></div>
+    <span id="mode"></span>
+  </div>
+  <p class="lede">The agent applies your unit's protocols to new results and drafts the orders. Every order shows the result it is
      based on. Nothing is written until you approve it.</p>
-  <span id="mode"></span>
+  <div class="flow"><span><b>1</b> Notices the new result</span><i>&rarr;</i><span><b>2</b> Reads the protocol and drafts the order</span><i>&rarr;</i><span><b>3</b> You review and approve</span></div>
   <nav>
     <button id="tab-watch" class="current">Results watch</button>
     <button id="tab-ask">Ask about a patient</button>
@@ -76,7 +114,7 @@
   <section>
     <h2>Worklist</h2>
     <p id="worklist-empty" class="note">New results the protocols cover appear here, with any orders the agent drafted.</p>
-    <p id="worklist-summary" class="summary"></p>
+    <div id="worklist-summary" class="kpis"></div>
     <div id="worklist"></div>
   </section>
 </main>
@@ -152,6 +190,11 @@ function resultLine(record) {
   return `${record.resourceType}/${record.id}: ${concept(record.code)} ${value} ${when}`.replace(/\s+/g, " ").trim();
 }
 
+function labPill(record) {
+  if (typeof record === "string" || !record || !record.valueQuantity) return resultLine(record);
+  return `${concept(record.code)} ${record.valueQuantity.value} ${record.valueQuantity.unit || ""}`.trim();
+}
+
 function renderStep(step) {
   if (step.note) return el("li", {class: "note"}, step.note);
   const args = step.arguments && typeof step.arguments === "object"
@@ -163,7 +206,7 @@ function renderStep(step) {
 
 function renderProposal(proposal) {
   const what = concept(proposal.payload.medicationCodeableConcept) || concept(proposal.payload.code);
-  const card = el("div", {class: proposal.superseded ? "card superseded" : "card"}, el("h3", {}, what ? `${proposal.resource}: ${what}` : proposal.resource));
+  const card = el("div", {class: proposal.superseded ? "card superseded" : "card"}, el("h3", {}, el("span", {class: "kind"}, {MedicationRequest: "Medication order", ServiceRequest: "Lab order"}[proposal.resource] || proposal.resource), what || ""));
   if (proposal.superseded) card.append(el("div", {class: "findings"}, el("strong", {}, "Superseded. "), "The agent drafted a later order with the same code in this run. Review that one; approving both would order twice."));
   const facts = el("dl");
   for (const [key, value] of rowsOf(proposal.payload)) facts.append(el("dt", {}, key), el("dd", {}, value));
@@ -175,7 +218,7 @@ function renderProposal(proposal) {
   if (proposal.findings) card.append(el("div", {class: "findings"}, el("strong", {}, "Gates rejected this write. "), proposal.findings));
   else card.append(el("p", {class: "passed"}, "Gates passed: required fields, value types and every cited record checked."));
   const outcome = el("p");
-  const approve = el("button", {}, proposal.findings ? "Override and write" : "Approve and write");
+  const approve = el("button", {class: proposal.findings ? "override" : "approve"}, proposal.findings ? "Override and write" : "Approve and write");
   const reject = el("button", {class: "secondary"}, "Reject");
   approve.onclick = async () => {
     approve.disabled = reject.disabled = true;
@@ -211,7 +254,9 @@ function needsPerson(event) {
 function renderEvent(event) {
   const ordered = current(event).length > 0;
   const box = el("div", {class: `event ${needsPerson(event) ? "action" : "quiet"}`});
-  box.append(el("div", {}, el("strong", {}, event.patient), ` · ${event.protocol} · `, resultLine(event.result)));
+  box.append(el("div", {class: "ev-head"}, el("span", {class: "mrn"}, event.patient), el("span", {class: "proto"}, event.protocol),
+    el("span", {class: "lab", title: resultLine(event.result)}, labPill(event.result))));
+  box.append(el("div", {class: "note", style: "font-size:13px;margin-top:4px"}, resultLine(event.result)));
   let status;
   if (event.status !== "completed") status = event.status;
   else if (ordered) {
@@ -222,7 +267,7 @@ function renderEvent(event) {
     const note = event.steps.filter((step) => step.note).map((step) => step.note).pop();
     status = note ? `No order drafted. Agent note: ${note}` : "No order drafted. The agent's reason is not checked.";
   }
-  box.append(el("div", {class: needsPerson(event) ? "" : "note"}, status));
+  box.append(el("span", {class: event.status !== "completed" ? "badge err" : ordered ? "badge act" : "badge none"}, status));
   for (const proposal of event.proposals) box.append(renderProposal(proposal));
   if (event.steps.length) {
     const steps = el("ol");
@@ -239,7 +284,7 @@ async function scan() {
   tick();
   const timer = setInterval(tick, 1000);
   $("worklist").replaceChildren();
-  $("worklist-summary").textContent = "";
+  $("worklist-summary").replaceChildren();
   try {
     const patients = $("patients").value.split(/\s+/).filter(Boolean);
     const {events} = await post("/api/watch", {patients});
@@ -249,9 +294,13 @@ async function scan() {
     const orders = actionable.reduce((n, e) => n + current(e).length, 0);
     const unprocessed = events.filter((e) => e.status !== "completed").length;
     $("worklist-empty").hidden = events.length > 0;
-    $("worklist-summary").textContent =
-      `${events.length} new results checked. ${actionable.length} need action: ${orders} orders drafted for review.` +
-      (unprocessed ? ` ${unprocessed} could not be processed by the agent and need a person.` : "");
+    const tile = (cls, n, label) => el("div", {class: `kpi ${cls}`}, el("b", {}, n), el("span", {}, label));
+    $("worklist-summary").replaceChildren(
+      tile("", events.length, "new results checked"),
+      tile("action", actionable.length, "need action"),
+      tile("orders", orders, "orders drafted for review"),
+      tile("", events.length - actionable.length - unprocessed, "no order"),
+      ...(unprocessed ? [tile("alert", unprocessed, "could not be processed, need a person")] : []));
     $("worklist").replaceChildren(...events.map(renderEvent));
     $("scan-status").textContent = "";
   } catch (error) {
