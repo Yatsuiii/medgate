@@ -9,11 +9,22 @@
   <img alt="Data: synthetic only" src="https://img.shields.io/badge/data-synthetic%20only-9ca3af">
 </p>
 
-A results watch for the hospital record. When a new lab result arrives, an agent applies the unit's protocol to it and drafts the orders the protocol calls for, each citing the result it is based on. Nothing is written to the record until a clinician approves the order on a review screen. Built on [MedAgentBench](https://github.com/stanfordmlgroup/MedAgentBench)'s FHIR server and graded by the benchmark's own grader.
+## The problem
 
-Why: abnormal results get acted on late or not at all. A systematic review found 6.8% to 62% of laboratory tests were never followed up, and even with a nurse-driven protocol one ward took 112 minutes from result to dose. Sources, and which numbers were checked on the primary page, are in [docs/PAIN.md](docs/PAIN.md). Protocols help a great deal; they still wait for someone to notice the result and build the order.
+A hospital runs on people remembering things. A potassium result comes back low late in a long shift. Someone has to notice it among everything else in their inbox, recall what the unit's protocol says, work out the dose, write the order, and remember to recheck in the morning. Each of those steps is a place where the patient can wait, and nobody in that chain was careless. The system asked a tired person to be the safety net.
 
-This runs on the benchmark's synthetic patients. It makes no clinical claims and is not for use with real patient data.
+The research agrees the steps slip:
+
+- **6.8% to 62%** of outpatient lab tests were never followed up, in a systematic review of 19 studies. The reported harms include hospital visits for hyperkalaemia after missed abnormal potassium results (Callen et al., 2012).
+- On one haematology ward, a nurse-driven electrolyte protocol cut the time from lab result to medication from **344 minutes to 112** (Gopalsami and Wheatley, 2023).
+
+Protocols help a great deal. They still wait for a person to notice the result and then build the order by hand. Sources, and which numbers were checked on the primary page, are in [docs/PAIN.md](docs/PAIN.md).
+
+## What medgate does about it
+
+medgate is a results watch for the hospital record. When a new lab result arrives, an agent applies the unit's protocol to it and drafts the orders the protocol calls for, each citing the result it is based on. The order is waiting, with the lab beside it, by the time the person looks, so their time goes to judging the order instead of building it. Nothing is written to the record until a clinician approves it on a review screen.
+
+It is built on [MedAgentBench](https://github.com/stanfordmlgroup/MedAgentBench)'s FHIR server and graded by the benchmark's own grader. It runs on the benchmark's synthetic patients, makes no clinical claims, and is not for use with real patient data.
 
 ## See it
 
