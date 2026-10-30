@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="624" viewBox="0 0 1200 624" role="img" aria-labelledby="t d">
+<title id="t">How one result becomes an order</title>
+<desc id="d">Five stages across three lanes. Code watches for the newest covered lab result per patient and protocol. Nemotron on Nebius reads the protocol text and drafts orders that cite the lab. Code gates check the payload and the citations. A person approves, rejects or overrides. Code then writes the approved order as FHIR and reads it back.</desc>
+<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#5b7482"/></marker></defs>
+<rect width="1200" height="624" fill="#ffffff"/>
+<g font-family="-apple-system, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif" fill="#14323f">
+<text x="40" y="44" font-size="24" font-weight="700">How one result becomes an order</text>
+<text x="40" y="70" font-size="15" fill="#5b7482">Who decides what: the code, the model, or a person. Nothing is written to the record until the person approves.</text>
+<rect x="40" y="96" width="1120" height="162" rx="12" fill="#eef3f8"/>
+<text x="58" y="118" font-size="12.5" font-weight="700" fill="#44607a" letter-spacing="1.2">CODE</text>
+<rect x="40" y="270" width="1120" height="162" rx="12" fill="#e7f6f1"/>
+<text x="58" y="292" font-size="12.5" font-weight="700" fill="#1f7a62" letter-spacing="1.2">NEMOTRON ON NEBIUS</text>
+<rect x="40" y="444" width="1120" height="162" rx="12" fill="#fdf2dc"/>
+<text x="58" y="466" font-size="12.5" font-weight="700" fill="#9a6a12" letter-spacing="1.2">A PERSON</text>
+<g fill="none" stroke="#5b7482" stroke-width="2" marker-end="url(#ar)">
+<path d="M244 189 H264 V363 H284"/>
+<path d="M468 363 H488 V189 H508"/>
+<path d="M692 189 H712 V537 H732"/>
+<path d="M916 537 H936 V189 H956"/>
+</g>
+<rect x="60" y="130" width="184" height="118" rx="10" fill="#fff" stroke="#44607a" stroke-width="2"/>
+<circle cx="82" cy="152" r="12" fill="#44607a"/><text x="82" y="157" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text>
+<text x="102" y="157" font-size="16" font-weight="700">Watch</text>
+<text x="74" y="184" font-size="13">Newest result a protocol</text>
+<text x="74" y="202" font-size="13">covers, last 24 hours,</text>
+<text x="74" y="220" font-size="13">per patient. Code never</text>
+<text x="74" y="238" font-size="13">judges the value.</text>
+<rect x="284" y="304" width="184" height="118" rx="10" fill="#fff" stroke="#1f7a62" stroke-width="2"/>
+<circle cx="306" cy="326" r="12" fill="#1f7a62"/><text x="306" y="331" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text>
+<text x="326" y="331" font-size="16" font-weight="700">Read and draft</text>
+<text x="298" y="358" font-size="13">Reads the protocol text,</text>
+<text x="298" y="376" font-size="13">checks the record for</text>
+<text x="298" y="394" font-size="13">exclusions, drafts orders</text>
+<text x="298" y="412" font-size="13">that cite the lab.</text>
+<rect x="508" y="130" width="184" height="118" rx="10" fill="#fff" stroke="#44607a" stroke-width="2"/>
+<circle cx="530" cy="152" r="12" fill="#44607a"/><text x="530" y="157" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text>
+<text x="550" y="157" font-size="16" font-weight="700">Gates</text>
+<text x="522" y="184" font-size="13">Payload: required fields</text>
+<text x="522" y="202" font-size="13">and value types.</text>
+<text x="522" y="220" font-size="13">Evidence: every cited</text>
+<text x="522" y="238" font-size="13">record was retrieved.</text>
+<rect x="732" y="478" width="184" height="118" rx="10" fill="#fff" stroke="#9a6a12" stroke-width="2"/>
+<circle cx="754" cy="500" r="12" fill="#9a6a12"/><text x="754" y="505" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">4</text>
+<text x="774" y="505" font-size="16" font-weight="700">Review</text>
+<text x="746" y="532" font-size="13">Order next to its lab.</text>
+<text x="746" y="550" font-size="13">Approve, reject, or</text>
+<text x="746" y="568" font-size="13">override a flagged</text>
+<text x="746" y="586" font-size="13">order.</text>
+<rect x="956" y="130" width="184" height="118" rx="10" fill="#fff" stroke="#44607a" stroke-width="2"/>
+<circle cx="978" cy="152" r="12" fill="#44607a"/><text x="978" y="157" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">5</text>
+<text x="998" y="157" font-size="16" font-weight="700">Commit</text>
+<text x="970" y="184" font-size="13">Writes standard FHIR,</text>
+<text x="970" y="202" font-size="13">reads it back and</text>
+<text x="970" y="220" font-size="13">compares every field.</text>
+</g></svg>

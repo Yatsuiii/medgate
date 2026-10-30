@@ -1,10 +1,58 @@
-# medgate
+<p align="center">
+  <img src="docs/assets/hero.svg" alt="medgate: a results watch for the hospital record. It notices the new result, reads the protocol and drafts the order, and you review and approve." width="100%">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-1f6feb"></a>
+  <img alt="Model: NVIDIA Nemotron 3 Super" src="https://img.shields.io/badge/model-NVIDIA%20Nemotron%203%20Super-4b5563">
+  <img alt="Runs on Nebius Token Factory" src="https://img.shields.io/badge/runs%20on-Nebius%20Token%20Factory-0f2a3d">
+  <img alt="Data: synthetic only" src="https://img.shields.io/badge/data-synthetic%20only-9ca3af">
+</p>
 
 A results watch for the hospital record. When a new lab result arrives, an agent applies the unit's protocol to it and drafts the orders the protocol calls for, each citing the result it is based on. Nothing is written to the record until a clinician approves the order on a review screen. Built on [MedAgentBench](https://github.com/stanfordmlgroup/MedAgentBench)'s FHIR server and graded by the benchmark's own grader.
 
 Why: abnormal results get acted on late or not at all. A systematic review found 6.8% to 62% of laboratory tests were never followed up, and even with a nurse-driven protocol one ward took 112 minutes from result to dose. Sources, and which numbers were checked on the primary page, are in [docs/PAIN.md](docs/PAIN.md). Protocols help a great deal; they still wait for someone to notice the result and build the order.
 
 This runs on the benchmark's synthetic patients. It makes no clinical claims and is not for use with real patient data.
+
+## See it
+
+<p align="center">
+  <img src="docs/assets/review-screen.png" alt="The review screen after a scan of the demo ward: 12 new results checked, 3 need action, 4 orders drafted for review, 9 with no order. The first row is a potassium of 3.1 with an oral potassium order that cites the lab, gates passed, and Approve and write and Reject buttons." width="100%">
+</p>
+
+A scan of the demo ward on the review screen: seven synthetic patients, two protocols, a recorded scan from the live model. Each order sits beside the lab it cites, and nothing is written until the reviewer clicks Approve. [Try the read-only demo.](https://yatsuiii.github.io/medgate/demo/)
+
+When a drafted order fails a structural check, the card says why, the button changes from Approve to Override, and the reviewer can reject it. Here the model sent a dosage instruction as a string where FHIR needs an array, and the gate caught it before anything reached the record:
+
+<p align="center">
+  <img src="docs/assets/gate-rejected.png" alt="A magnesium order card showing the message: Gates rejected this write. POST request rejected: dosageInstruction: expected array, got str. The Override and write button is greyed out and the card reads: Rejected. Nothing written." width="80%">
+</p>
+
+## How it works
+
+<p align="center">
+  <img src="docs/assets/flow.svg" alt="Five stages across three lanes. Code watches for the newest covered lab result per patient and protocol. Nemotron on Nebius reads the protocol text and drafts orders that cite the lab. Code gates check the payload and the citations. A person approves, rejects or overrides. Code then writes the approved order as FHIR and reads it back." width="100%">
+</p>
+
+The code never decides what is abnormal, and the model never writes to the record. The gates see structure, not meaning, so a person is the only barrier for a wrong dose. More under [Under the screen](#under-the-screen-the-agent-and-its-harness) and [What the gates catch](#what-the-gates-catch).
+
+## Results at a glance
+
+Every experiment was written down, with its pass line, before the model ran, and the failures are reported. All runs are Nemotron 3 Super on Nebius Token Factory, on synthetic data.
+
+| What was tested | Result | Write-up |
+| --- | --- | --- |
+| Pilot, 30 benchmark tasks | 13/30 for the benchmark's reference loop, 27/30 for our tool-calling agent. A pilot only. | [PILOT_RESULTS](docs/PILOT_RESULTS.md) |
+| The watch on the demo ward | 23 of 27 graded runs correct, nothing ordered where the protocol says not to. Failures were mostly silent misses. | [WATCH_RESULTS](docs/WATCH_RESULTS.md) |
+| One-time self-review, 44 held-out events | Silent misses 33 of 120 runs to 0, no false orders. Complete and accurate order sets 62% to 90%. | [HELDOUT_RESULTS](docs/HELDOUT_RESULTS.md) |
+| Three unseen protocols, first confirmation | 332/376 (88.3%). Verdict CAUTION: below the 90% bar. | [CONFIRM_RESULTS](docs/CONFIRM_RESULTS.md) |
+| Three unseen protocols, second confirmation | 407/440 (92.5%), no unsafe order. Verdict SUPPORTED. | [CONFIRM2_RESULTS](docs/CONFIRM2_RESULTS.md) |
+| Three unseen protocols, third confirmation | 128/240 (53.3%) as registered, because our own grader rejected a correct default. 224/240 (93.3%) after the fix, labelled post hoc. | [CONFIRM3_RESULTS](docs/CONFIRM3_RESULTS.md) |
+| A second Nemotron as checker | Caught 31 of 33 wrong order sets (Super) and 30 of 33 (Ultra); flagged none of 80 correct ones. Detection only. | [VERIFIER_RESULTS](docs/VERIFIER_RESULTS.md) |
+| What the gates catch, scripted | Blocked 5 of 5 structural mistakes. 4 of 4 mistakes in meaning reached the worklist unflagged. | [GATE_CATCH](docs/GATE_CATCH.md) |
+
+A coded rule script beats the agent on accuracy for these protocols; what the agent adds is that a unit writes a protocol as text instead of code ([RULESET_RESULTS](docs/RULESET_RESULTS.md)).
 
 > **Status: three pre-registered experiments have run on Nemotron 3 Super (Nebius Token Factory), each on a small sample.** (1) The 30-task pilot: the benchmark's reference loop got **13/30**, our tool-calling agent **27/30**, so by the frozen rule the claim that gates raise task success is dropped ([docs/PILOT_RESULTS.md](docs/PILOT_RESULTS.md)). (2) The results watch on the demo ward: **23 of 27** graded runs correct, nothing ordered where the protocol says not to, every order cited, which met the criteria narrowly; the failures were mostly **silent misses**, the agent finishing without ordering ([docs/WATCH_RESULTS.md](docs/WATCH_RESULTS.md)). (3) A fix tested on 44 held-out events: a one-time review of the agent's decision before it finishes took silent misses from **33 of 120 runs to 0**, with no false orders, no order on the hold event, and complete and accurate order sets rising from 62% to 90% ([docs/HELDOUT_RESULTS.md](docs/HELDOUT_RESULTS.md)). The review is now the watch's default. Side effect: in 6% of runs it drafts a corrected order next to the original, so the screen marks the earlier one superseded. The gates block structural mistakes, not mistakes in meaning ([docs/GATE_CATCH.md](docs/GATE_CATCH.md)). Synthetic data, one model, no clinicians.
 
