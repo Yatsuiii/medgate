@@ -146,7 +146,7 @@ python, uv, httpx, fhir, nebius, nemotron, medagentbench
 
 - Working demo (a read-only recorded scan of the live model; running it yourself is in the README): https://yatsuiii.github.io/medgate/demo/
 - Repository: https://github.com/Yatsuiii/medgate
-- Demo video (under 3 minutes): [YOUTUBE URL]
+- Demo video (under 3 minutes): https://youtu.be/enpnninGAeQ
 
 ## Notes for the form
 

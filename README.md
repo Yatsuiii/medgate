@@ -29,6 +29,12 @@ It is built on [MedAgentBench](https://github.com/stanfordmlgroup/MedAgentBench)
 ## See it
 
 <p align="center">
+  <a href="https://youtu.be/enpnninGAeQ"><img src="https://i.ytimg.com/vi/enpnninGAeQ/maxresdefault.jpg" alt="Watch the demo video: Medgate, orders ready before anyone looks (2 minutes 56 seconds)" width="70%"></a>
+</p>
+
+**Watch the demo (under 3 minutes):** [Medgate: Orders ready before anyone looks](https://youtu.be/enpnninGAeQ). A live scan of the demo ward, the gate catching a malformed order, and one approved order written and read back.
+
+<p align="center">
   <img src="docs/assets/review-screen.png" alt="The review screen after a scan of the demo ward: 12 new results checked, 3 need action, 4 orders drafted for review, 9 with no order. The first row is a potassium of 3.1 with an oral potassium order that cites the lab, gates passed, and Approve and write and Reject buttons." width="100%">
 </p>
 
